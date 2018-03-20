@@ -9,7 +9,7 @@
 参考書は「CUDA C プロフェッショナル プログラミング」(impress)
 
 #### 2.ディレクトリ構成
-* hello
+* hello  
 hello world コード
-* sumArray
+* sumArray  
 ベクトルの和のサンプル
