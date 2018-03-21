@@ -12,4 +12,6 @@
 * hello  
 hello world コード
 * sumArray  
-ベクトルの和のサンプル
+ベクトルの和のサンプル  
+* check_dimension
+グリッド,ブロック,スレッドの確認サンプル
