@@ -1,5 +1,12 @@
+#include <cuda_runtime.h>
 #include <stdlib.h>
 #include <time.h>
+
+#define CHECK(call)                 \
+  {                                 \
+    const cudaError_t error = call; \
+    if(error != cudaSucess)         \
+      # 
 
 // ホスト側でベクトルの和を計算
 void sumArraysOnHost(float *A, float *B, float *C, const int N){
