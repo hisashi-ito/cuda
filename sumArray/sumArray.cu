@@ -1,6 +1,7 @@
 #include <cuda_runtime.h>
 #include <stdlib.h>
 #include <time.h>
+#include <stdio.h>
 
 #define CHECK(call)                               \
 {                                                 \
@@ -11,15 +12,15 @@
     printf("code:%d, reason: %s\n", error,        \
             cudaGetErrorString(error));           \
     exit(1);                                      \
-  }                                               \          
-}
- 
+  }                                               \
+}                                                 \
+
 // ホストで計算した値とGPUで計算した値が同一かチェックする 
-void checkResult(float *hostRef, float *gpuRef, cont int N){
+void checkResult(float *hostRef, float *gpuRef, const int N){
   double epsilon = 1.0E-8;
   bool match = 1;
   for(int i = 0; i < N; i++){
-    if(abs(hostRed[i] - gpuRef[i]) > epsilon){
+    if(abs(hostRef[i] - gpuRef[i]) > epsilon){
       match = 0;
       printf("Arrays do not match!\n");
       printf("host %5.2f gpu %5.2f at current %d\n",hostRef[i], gpuRef[i],i);
@@ -54,15 +55,14 @@ void sumArraysOnHost(float *A, float *B, float *C, const int N){
 // カーネル関数の定義
 // sumArraysOnHost に対して配列を操作するloopが存在しない!!
 // 配列のループの代わりに複数のthread で計算する
-__global__ void sumArrayOnGPU(float *A, float *B, float *c){
+__global__ void sumArrayOnGPU(float *A, float *B, float *C){
   // スレッドIDを割り当てる
-  int i = threadId.x;
+  int i = threadIdx.x;
   C[i] = A[i] + B[i];
 }
 
-
 int main(int argc, char** argv){
-  printf("%s Starting..\n", argv[0]);
+  printf("%s Starting...\n", argv[0]);
   int dev = 0;         // デバイスのセットアップ
   cudaSetDevice(dev);  // 0番目(1枚目) のデバイス(GPUカード)を利用する
   
@@ -78,13 +78,12 @@ int main(int argc, char** argv){
   hostRef = (float *)malloc(nBytes);
   gpuRef  = (float *)malloc(nBytes);
   
-  
   // ホスト側で配列を初期化する
   initialData(h_A, nElem);
   initialData(h_B, nElem);
   memset(hostRef, 0, nBytes);
-  memset(gpuRef, 0,  nBytes);
-  
+  memset(gpuRef, 0, nBytes);
+    
   // デバイス側のグローバルメモリを取得する
   float *d_A, *d_B, *d_C;
   // cudaMalloc( void **devPtr, size_t size) の形式
@@ -94,7 +93,6 @@ int main(int argc, char** argv){
   cudaMalloc((void**)&d_B, nBytes);
   cudaMalloc((void**)&d_C, nBytes);
   
-
   // ホストからデバイスへデータ転送
   // CPU -> GPU 
   cudaMemcpy(d_A, h_A, nBytes, cudaMemcpyHostToDevice);
@@ -105,7 +103,7 @@ int main(int argc, char** argv){
   dim3 block(nElem);
   dim3 grid(1);
   
-  sumArrayOnGPU <<grid, block>>(d_A, d_B, d_C, nElem);
+  sumArrayOnGPU<<<grid, block>>>(d_A, d_B, d_C);
   printf("Execution configure << %d, %d >>\n", grid.x, block.x);
   
   // カーネル関数の結果をホスト側にコピー
