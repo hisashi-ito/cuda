@@ -17,7 +17,7 @@ int main(){
   thrust::host_vector<int> h_B(3);
   thrust::host_vector<int> h_C(3);  
 
-  // 適合に初期化する
+  // 適当に初期化する
   for(int i = 0; i<3; i++){
     h_A[i] = i;
     h_B[i] = i+3;
