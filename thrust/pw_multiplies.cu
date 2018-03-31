@@ -12,14 +12,16 @@
 #include <iostream>
 
 int main(){
-  // C++11 からこの方法で初期化可能
-  // データ列を指定して動的配列を生成できる
-  // STL vector と同じ
-  // host 側のメモリを確保 
-  thrust::host_vector<int> h_A{1,2,3};
-  thrust::host_vector<int> h_B{4,5,6};
-  thrust::host_vector<int> h_C(3);
-  
+  // ホスト側のメモリを確保
+  thrust::host_vector<int> h_A(3);
+  thrust::host_vector<int> h_B(3);
+  thrust::host_vector<int> h_C(3);  
+
+  // 適合に初期化する
+  for(int i = 0; i<3; i++){
+    h_A[i] = i;
+    h_B[i] = i+3;
+  }
   // device 側のメモリを確保
   thrust::device_vector<int> d_A(3);
   thrust::device_vector<int> d_B(3);
