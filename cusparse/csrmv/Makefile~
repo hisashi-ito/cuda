@@ -1,5 +1,0 @@
-# Make file for csr.cu
-csr:csr.cu
-	nvcc -Wno-deprecated-gpu-targets -lcusparse -o csr csr.cu
-clean:
-	rm csr
