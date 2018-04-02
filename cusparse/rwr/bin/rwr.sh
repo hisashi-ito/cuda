@@ -1,0 +1,9 @@
+#! /bin/sh
+ALPHA=0.85
+mat="../data/matrix.tsv"
+vec="../data/vec.tsv"
+output="./output.tsv"
+cmd="./rwr"
+main_cmd="${cmd} -i ${mat} -v ${vec} -o ${output} -a ${ALPHA}"
+echo ${main_cmd}
+eval ${main_cmd}

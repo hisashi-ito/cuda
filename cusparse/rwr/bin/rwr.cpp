@@ -87,13 +87,26 @@ void load_matrix(string file,
 //         初期ベクトル(vec)
 // @return void
 //   
-void load_vec(string file, vector<double> &vec){
-  // 工事中..
+void load_vecs(string file, vector< vector<double> > &vecs){
+  string buff;
+  vector<double> tmp;
+  ifstream ifs(file.c_str());
+  if(ifs.fail()){
+    cerr << "[error] 初期ベクトルファイルの読み込みに失敗しました" << endl;
+    exit(-1);
+  }
   
+  // 初期ベクトルファイルの読み込み
+  // フォーマット) 数値1<SP>数値2...
+  while(getline(ifs, buff)){
+    vector<string> elems = split(buff, ' ');
+    for(int i = 0; i < elems.size(); i++){
+      tmp.push_back((double)atof(elems[i].c_str()));
+    }
+    vecs.push_back(tmp);
+    tmp.clear();
+  }
 }
-
-
-
 
 // @main
 // メイン関数
@@ -107,7 +120,7 @@ int main(int argc, char *argv[]){
   int opt = 0;
 
   string trans_mat; // 遷移行列ファイル
-  string init_vec;  // 初期べベクトルファイル
+  string init_vec; // 初期べベクトルファイル
   string alpha;     // alpha パラメータ ・・・ google matrix parameter
   string output;    // 出力ファイル
   
@@ -116,8 +129,11 @@ int main(int argc, char *argv[]){
   vector<int> columns;
   vector<double> values;
   
+  // 初期ベクトル
+  vector< vector<double> > vecs;
+  
   // 引数parse
-  while((opt = getopt(argc, argv,"i:v:o:")) != -1){
+  while((opt = getopt(argc, argv,"i:v:o:a:")) != -1){
     switch(opt){
     case 'i':
       trans_mat = optarg;
@@ -146,6 +162,11 @@ int main(int argc, char *argv[]){
   load_matrix(trans_mat.c_str(), rows, columns, values);
   
   // 初期ベクトルを読み込む
+  load_vecs(init_vec.c_str(), vecs);
   
   
+  
+  
+  
+  exit(0);
 }
