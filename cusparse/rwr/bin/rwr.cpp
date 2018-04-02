@@ -165,8 +165,5 @@ int main(int argc, char *argv[]){
   load_vecs(init_vec.c_str(), vecs);
   
   
-  
-  
-  
   exit(0);
 }
