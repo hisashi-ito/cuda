@@ -1,7 +1,8 @@
 //
 // 【coo2csr】
 //
-//  概要: coo保存形式csr形式への変換サンプル
+//  概要: cuSPARSE 行列変換サンプル
+//        coo保存形式からcsr形式への変換する
 //
 #include <cuda_runtime.h>
 #include <iostream>
@@ -48,6 +49,8 @@ int main(){
 
   // non-zero 要素数
   int nnz = h_values.size();
+  // 変換前の行列の行数(rows)
+  int rsize = max_element(h_rows.begin(), h_rows.end());
   
   // デバイス側でCOO形式のデバイスメモリを取得
   // ただし、CSR形式への変換はh_values, h_cols は変更必要ない
@@ -64,8 +67,9 @@ int main(){
   cusparseSetMatIndexBase(matDescr, CUSPARSE_INDEX_BASE_ZERO);
 
   // COO -> CSR 形式へ変換(rowsだけ)
-  cusparseXcoo2csr(handle,thrust::raw_pointer_cast(&d_rows[0]),nnz,3,
+  cusparseXcoo2csr(handle,thrust::raw_pointer_cast(&d_rows[0]),nnz,rsize,
 		   thrust::raw_pointer_cast(&d_csr_rows[0]),CUSPARSE_INDEX_BASE_ZERO);
+  
   // 計算結果を確認
   for(int i =0; i< d_csr_rows.size(); i++){
     cout << d_csr_rows[i] << endl;
