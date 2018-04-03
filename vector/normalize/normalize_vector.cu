@@ -23,7 +23,7 @@ void normalize(thrust::device_vector<double> &v){
 int main(){
   thrust::device_vector<double> vec(2);
   vec[0] = 1.0;
-  vec[1] = 1.0;
+  vec[1] = 2.0;
   // ベクトルの正規化
   normalize(vec);
   // 確認
