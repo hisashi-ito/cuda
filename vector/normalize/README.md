@@ -1,4 +1,4 @@
-#### CUDAを利用したベクトルの正規化
+### CUDAを利用したベクトルの正規化
 CUDAを利用したベクトルの正規化関数の実装例。  
 参考にした出典は以下の本  
 __CUDA for Engineers: An Introduction to High-Performance Parallel Computing__
