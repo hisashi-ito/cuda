@@ -1,5 +1,5 @@
-### CUDAを利用したベクトルの正規化
-CUDAを利用したベクトルの正規化関数の実装例。  
+### CUDAを利用したベクトルの正規化　(normalize vector uisng CUDA)
+CUDAを利用したベクトルの正規化関数の実装例。  
 参考にした出典は以下の本  
 __CUDA for Engineers: An Introduction to High-Performance Parallel Computing__
 https://www.amazon.co.jp/dp/B017HXS0J0/ref=dp-kindle-redirect?_encoding=UTF8&btkr=1  
