@@ -1,4 +1,4 @@
-#### cuSPARSE 行列変換サンプル
+### cuSPARSE 行列変換サンプル
 cuSPARSEを利用して行列の形式を変換するサンプルコード。  
 本コードではCOO形式からCRS形式へ変換を実施する。サンプルとなる行列(M)は以下とする。  
 ```
@@ -7,14 +7,14 @@ cuSPARSEを利用して行列の形式を変換するサンプルコード。  
 0 2 1
 ```
 
-##### COO(座標格納)方式
+#### COO(座標格納)方式
 COO形式で行列(M)を保存すると
 ```
 values = [3,6,2,1]
 rows   = [0,0,1,2]
 cols   = [0,1,2,2]
 ```
-##### CSR(Compressed Sparse Row)方式
+#### CSR(Compressed Sparse Row)方式
 CSR形式で行列(M)を保存すると
 ```
 values = [3,6,2,1]
