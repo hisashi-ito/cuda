@@ -122,17 +122,17 @@ void Diag::load_matrix(const string file, thrust::host_vector<int> &rows,
 // @breaf: 対角化関数、実際にはG-matrix を対角化する
 // @param: 
 //
-void Diag::power_method(thrust::host_vector<double> &x, 
-			thrust::host_vector<double> &y){
+void Diag::power_method(thrust::host_vector<double> &h_x, 
+			thrust::host_vector<double> &h_y){
   // ベクトル情報をGPUへオフロード
-  thrust::device_vector<double> x = x;          
-  thrust::device_vector<double> init_x(x.size());
-  thrust::device_vector<double> y(x.size());
-  
-  // xをinit_x にdeep copyする
-  thrust::copy(x.begin(), x.end(), init_x);
-  // init_x をbeta 倍する
-  const_multiplies(init_x, beta);
+  thrust::device_vector<double> d_x = h_x;          
+  thrust::device_vector<double> d_y(x.size());
+  thrust::device_vector<double> d_init_x(x.size());
+  // d_x → d_init_x
+  thrust::copy(d_x.begin(), d_x.end(), d_init_x);
+  // d_init_x → beta(1-alpha) * d_init_x
+  double beta = 1.0 - this->alpha;
+  const_multiplies(d_init_x, beta);
   
   // cuSPARSE のハンドルを作成(必要ないかもしれない) 
   cusparseHandle_t handle;
@@ -142,12 +142,11 @@ void Diag::power_method(thrust::host_vector<double> &x,
   cusparseSetMatType(matDescr, CUSPARSE_MATRIX_TYPE_GENERAL);
   cusparseSetMatIndexBase(matDescr, CUSPARSE_INDEX_BASE_ZERO);
   
-  double* _x = thrust::raw_pointer_cast(&(x[0]));
-  double* _y = thrust::raw_pointer_cast(&(y[0]));
+  double* _d_x = thrust::raw_pointer_cast(&(d_x[0]));
+  double* _d_y = thrust::raw_pointer_cast(&(d_y[0]));
   double* _d_csr_vals = thrust::raw_pointer_cast(&(d_csr_vals[0]));
   double* _d_csr_cols = thrust::raw_pointer_cast(&(d_csr_cols[0]));
   double* _d_csr_rows = thrust::raw_pointer_cast(&(d_csr_rows[0]));
-  double beta  = 1.0 - this->alpha;
   double dummy = 0.0;
   
   for(int i = 0; i < this->iteration, i++){
@@ -167,12 +166,12 @@ void Diag::power_method(thrust::host_vector<double> &x,
     normalize(y);
     // y → x
     thrust::copy(y.begin(), y.end(), x);
-    // デバイスポインタへ戻す
+    // デバイスポインタを元に戻す
     _x = thrust::raw_pointer_cast(&(x[0]));
     _y = thrust::raw_pointer_cast(&(y[0]));
   }
   // デバイスから計算結果を返却
-  thrust::copy_n(_y.begin(), _y.end(), y);
+  thrust::copy_n(y.begin(), y.end(), h_y);
 }
 
 // @normalize

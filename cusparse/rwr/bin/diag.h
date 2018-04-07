@@ -72,4 +72,4 @@ class Diag{
   thrust::host_vector<int> h_cols;
   thrust::host_vector<double> h_vals;
 };
-/*_DIAG_*/
+#endif /*_DIAG_*/
