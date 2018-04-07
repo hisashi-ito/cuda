@@ -63,7 +63,6 @@ Diag::Diag(const string coo_file, int iteration, double alpha){
 
 // @destructor
 //  デストラクタ
-//
 Diag::~Diag(void){
   // 行列要素等をfreeすべきだが、thrustを
   // 利用しているので自動で返却される
@@ -96,7 +95,7 @@ vector<string> Diag::split(const string &s, char delim){
 // @param: rows, cols, vals (COO行列のベクトル)
 //
 void Diag::load_matrix(const string file, thrust::host_vector<int> &rows, 
-		  thrust::host_vector<int> &cols, thrust::host_vector<double> &vals){
+		       thrust::host_vector<int> &cols, thrust::host_vector<double> &vals){
   string buff;
   ifstream ifs(file.c_str());
   if(ifs.fail()){
@@ -113,8 +112,8 @@ void Diag::load_matrix(const string file, thrust::host_vector<int> &rows,
     double val = (double)atof(elems[2].c_str());
     // vector へpushする
     rows.push_back(row);
-    columns.push_back(col);
-    values.push_back(val);
+    cols.push_back(col);
+    vals.push_back(val);
   }
 }
 
@@ -124,10 +123,16 @@ void Diag::load_matrix(const string file, thrust::host_vector<int> &rows,
 // @param: 
 //
 void Diag::power_method(thrust::host_vector<double> &x, 
-		   thrust::host_vector<double> &ret){
+			thrust::host_vector<double> &y){
   // ベクトル情報をGPUへオフロード
-  thrust::device_vector<double> x = x;       //  初期ベクトル
-  thrust::device_vector<double> y(x.size()); //　レンポラリベクトル
+  thrust::device_vector<double> x = x;          
+  thrust::device_vector<double> init_x(x.size());
+  thrust::device_vector<double> y(x.size());
+  
+  // xをinit_x にdeep copyする
+  thrust::copy(x.begin(), x.end(), init_x);
+  // init_x をbeta 倍する
+  const_multiplies(init_x, beta);
   
   // cuSPARSE のハンドルを作成(必要ないかもしれない) 
   cusparseHandle_t handle;
@@ -137,19 +142,37 @@ void Diag::power_method(thrust::host_vector<double> &x,
   cusparseSetMatType(matDescr, CUSPARSE_MATRIX_TYPE_GENERAL);
   cusparseSetMatIndexBase(matDescr, CUSPARSE_INDEX_BASE_ZERO);
   
+  double* _x = thrust::raw_pointer_cast(&(x[0]));
+  double* _y = thrust::raw_pointer_cast(&(y[0]));
   double* _d_csr_vals = thrust::raw_pointer_cast(&(d_csr_vals[0]));
   double* _d_csr_cols = thrust::raw_pointer_cast(&(d_csr_cols[0]));
   double* _d_csr_rows = thrust::raw_pointer_cast(&(d_csr_rows[0]));
-  double* _x = thrust::raw_pointer_cast(&(x[0]));
-  double* _y = thrust::raw_pointer_cast(&(y[0]));
-  double beta = 1.0 - this->alpha;
+  double beta  = 1.0 - this->alpha;
+  double dummy = 0.0;
   
   for(int i = 0; i < this->iteration, i++){
-    // y = alpha * Ax + beta * y
-
-    // 工事中...
-    cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE);
+    // y = α ∗ A ∗ x + (0 * y)
+    cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+		   this->row_size, this->col_size, this->nnz,
+		   &this->alpha, matDescr,
+		   _d_csr_vals, _d_csr_rows, _d_csr_cols,
+		   _x, &dummy, _y);
+    
+    // デバイスポインタの変換
+    x = thrust::raw_pointer_cast(&(_x[0]));
+    y = thrust::raw_pointer_cast(&(_y[0]));
+    // y += (β * init_x)
+    thrust::transform(y.begin(), y.end(), init_x.begin(), y.begin(),thrust::plus<double>());
+    // y をnormalizeする
+    normalize(y);
+    // y → x
+    thrust::copy(y.begin(), y.end(), x);
+    // デバイスポインタへ戻す
+    _x = thrust::raw_pointer_cast(&(x[0]));
+    _y = thrust::raw_pointer_cast(&(y[0]));
   }
+  // デバイスから計算結果を返却
+  thrust::copy_n(_y.begin(), _y.end(), y);
 }
 
 // @normalize
@@ -161,4 +184,14 @@ void Diag::normalize(thrust::device_vector<double> &v){
   double norm = sqrt(thrust::inner_product(v.begin(), v.end(), v.begin(), 0.0));
   using namespace thrust::placeholders;
   thrust::transform(v.begin(), v.end(), v.begin(), _1 /= norm);
+}
+
+// @const_multiplies
+//  ベクトルの低数倍
+// @bread: 行列を低数倍する
+// @param: ベクトル
+//
+void Diag::const_multiplies(thrust::device_vector<double> &v, double alpha){
+  using namespace thrust::placeholders;
+  thrust::transform(v.begin(), v.end(), v.begin(), _1 *= alpha);
 }
