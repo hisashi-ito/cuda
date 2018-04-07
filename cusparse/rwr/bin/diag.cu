@@ -13,7 +13,7 @@
 // 更新履歴:
 //          2018.04.03 新規作成
 //
-#include 'diag.h'
+#include "diag.h"
 
 // @constructor
 //  コンストラクタ
@@ -24,7 +24,8 @@
 Diag::Diag(const string coo_file, int iteration, double alpha){
   // パラメータをインスタンス変数へ保存する
   this->iteration = iteration;
-  this->alpha     = alpha;
+  this->alpha = alpha;
+  this->util  = new Util();
   
   // [ホスト側]
   //  COO形式の行列を読み込む 
@@ -43,10 +44,10 @@ Diag::Diag(const string coo_file, int iteration, double alpha){
   // デバイス側でCOO形式のデバイスメモリを取得
   // ただし、CSR形式への変換はh_vals, h_cols は変更必要ない。
   // h_rows だけが変更がなされる
-  thrust::device_vector<int>    d_csr_cols = h_cols;
-  thrust::device_vector<double> d_csr_vals = h_vals;
-  thrust::device_vector<int> d_rows = h_rows;
-  thrust::device_vector<int> d_csr_rows(this->row_size+1);
+  this->d_csr_cols = h_cols;
+  this->d_csr_vals = h_vals;
+  this->d_rows     = h_rows;
+  this->d_csr_rows = thrust::host_vector<int>(this->row_size+1);
   
   // 行列のディスクリプタを記述
   cusparseMatDescr_t matDescr;
@@ -68,26 +69,6 @@ Diag::~Diag(void){
   // 利用しているので自動で返却される
 }
 
-// @split
-//  文字列分割関数
-// @breaf 指定のデリミネタを利用してstringの文字列を分割する
-//        分割された文字列は vector<string> 文字列に格納される
-// @param 文字列(string)
-// @param 分割デリミネタ(char)
-// @return 分割された文字列が vector<string>で返却される
-//
-vector<string> Diag::split(const string &s, char delim){
-  vector<string> elems;
-  stringstream ss(s);
-  string item;
-  while (getline(ss, item, delim)) {
-    if (!item.empty()){
-      elems.push_back(item);
-    }
-  }
-  return elems;
-}
-
 // @load_matrix
 //  行列読み込み関数
 // @breaf: COO形式の行列を読み込む。読み込み後はrows, cols, vals に保存される
@@ -106,7 +87,7 @@ void Diag::load_matrix(const string file, thrust::host_vector<int> &rows,
   // row, colums でソートされていることを期待します!
   // フォーマット) row<TAB>column<TAB>value
   while(getline(ifs, buff)){
-    vector<string> elems = split(buff, '\t');
+    vector<string> elems = this->util->split(buff, '\t');
     int row    = atoi(elems[0].c_str());
     int col    = atoi(elems[1].c_str());
     double val = (double)atof(elems[2].c_str());
@@ -125,12 +106,14 @@ void Diag::load_matrix(const string file, thrust::host_vector<int> &rows,
 //
 void Diag::power_method(thrust::host_vector<double> &h_x, 
 			thrust::host_vector<double> &h_y){
+
   // ベクトル情報をGPUへオフロード
   thrust::device_vector<double> d_x = h_x;          
-  thrust::device_vector<double> d_y(x.size());
-  thrust::device_vector<double> d_init_x(x.size());
+  thrust::device_vector<double> d_y(h_x.size());
+  thrust::device_vector<double> d_init_x(h_x.size());
+
   // d_x → d_init_x
-  thrust::copy(d_x.begin(), d_x.end(), d_init_x);
+  thrust::copy(d_x.begin(), d_x.end(), d_init_x.begin());
   // d_init_x → beta(1-alpha) * d_init_x
   double beta = 1.0 - this->alpha;
   const_multiplies(d_init_x, beta);
@@ -145,34 +128,35 @@ void Diag::power_method(thrust::host_vector<double> &h_x,
   
   double* _d_x = thrust::raw_pointer_cast(&(d_x[0]));
   double* _d_y = thrust::raw_pointer_cast(&(d_y[0]));
-  double* _d_csr_vals = thrust::raw_pointer_cast(&(d_csr_vals[0]));
-  double* _d_csr_cols = thrust::raw_pointer_cast(&(d_csr_cols[0]));
-  double* _d_csr_rows = thrust::raw_pointer_cast(&(d_csr_rows[0]));
+  double* _d_csr_vals = thrust::raw_pointer_cast(&(this->d_csr_vals[0]));
+  int* _d_csr_cols = thrust::raw_pointer_cast(&(this->d_csr_cols[0]));
+  int* _d_csr_rows = thrust::raw_pointer_cast(&(this->d_csr_rows[0]));
   double dummy = 0.0;
   
-  for(int i = 0; i < this->iteration, i++){
+  for(int i = 0; i < this->iteration; i++){
     // y = α ∗ A ∗ x + (0 * y)
     cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
 		   this->row_size, this->col_size, this->nnz,
 		   &this->alpha, matDescr,
 		   _d_csr_vals, _d_csr_rows, _d_csr_cols,
-		   _x, &dummy, _y);
+		   _d_x, &dummy, _d_y);
     
     // raw ポインタからデバイスポインタへ変換
-    x = thrust::device_pointer_cast(&(_x[0]));
-    y = thrust::device_pointer_cast(&(_y[0]));
+    //d_x = thrust::device_pointer_cast(&(_d_x[0]));
+    //d_y = thrust::device_pointer_cast(_d_y);
     // y += (β * init_x)
-    thrust::transform(y.begin(), y.end(), init_x.begin(), y.begin(),thrust::plus<double>());
+    thrust::transform(d_y.begin(), d_y.end(), d_init_x.begin(), d_y.begin(),thrust::plus<double>());
     // y をnormalizeする
-    normalize(y);
+    normalize(d_y);
     // y → x
-    thrust::copy(y.begin(), y.end(), x);
+    thrust::copy(d_y.begin(), d_y.end(), d_x.begin());
     // デバイスポインタをraw ポインタへ変換
-    _x = thrust::raw_pointer_cast(&(x[0]));
-    _y = thrust::raw_pointer_cast(&(y[0]));
+    _d_x = thrust::raw_pointer_cast(&(d_x[0]));
+    _d_y = thrust::raw_pointer_cast(&(d_y[0]));
   }
+  
   // デバイスから計算結果を返却
-  thrust::copy_n(y.begin(), y.end(), h_y);
+  thrust::copy(d_y.begin(), d_y.end(), h_y.begin());
 }
 
 // @normalize
