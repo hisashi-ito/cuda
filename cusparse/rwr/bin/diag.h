@@ -52,6 +52,13 @@ class Diag{
   // split 関数
   vector<string> split(const string &s, char delim);
   
+  // ベクトルの正規化
+  void normalize(thrust::device_vector<double> &v);
+  
+  // 定数の乗算
+  // v = alpha * v
+  void const_multiplies(thrust::device_vector<double> &v, double alpha)
+  
  private:
   int iteration;   // べき乗法の繰り返し回数
   double alpha;    // アルファパラメータ(G-parameter)
