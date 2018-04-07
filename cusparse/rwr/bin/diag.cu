@@ -142,8 +142,8 @@ void Diag::power_method(thrust::host_vector<double> &h_x,
 		   _d_x, &dummy, _d_y);
     
     // raw ポインタからデバイスポインタへ変換
-    //d_x = thrust::device_pointer_cast(&(_d_x[0]));
-    //d_y = thrust::device_pointer_cast(_d_y);
+    &d_x[0] = thrust::device_pointer_cast(&(_d_x[0]));
+    &d_y[0] = thrust::device_pointer_cast(&(_d_y[0]));
     // y += (β * init_x)
     thrust::transform(d_y.begin(), d_y.end(), d_init_x.begin(), d_y.begin(),thrust::plus<double>());
     // y をnormalizeする
