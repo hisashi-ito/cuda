@@ -104,14 +104,13 @@ void Diag::load_matrix(const string file, thrust::host_vector<int> &rows,
 // @param: 推薦元の初期ベクトル
 // @param: 計算結果ベクトル(固有Vector) 
 //
-void Diag::power_method(thrust::host_vector<double> &h_x, 
+void Diag::power_method(const thrust::host_vector<double> &h_x, 
 			thrust::host_vector<double> &h_y){
-
   // ベクトル情報をGPUへオフロード
-  thrust::device_vector<double> d_x = h_x;          
+  thrust::device_vector<double> d_x = h_x;
   thrust::device_vector<double> d_y(h_x.size());
   thrust::device_vector<double> d_init_x(h_x.size());
-
+  
   // d_x → d_init_x
   thrust::copy(d_x.begin(), d_x.end(), d_init_x.begin());
   // d_init_x → beta(1-alpha) * d_init_x
@@ -179,3 +178,25 @@ void Diag::const_multiplies(thrust::device_vector<double> &v, double alpha){
   using namespace thrust::placeholders;
   thrust::transform(v.begin(), v.end(), v.begin(), _1 *= alpha);
 }
+
+
+#ifdef _DEBUG_
+int main(){
+  thrust::host_vector<double> vec;
+  thrust::host_vector<double> ret;
+  // 入力Vectorの初期化
+  vec.push_back(0.01);
+  vec.push_back(0.02);
+  vec.push_back(0.01);
+  ret.push_back(0.0);
+  ret.push_back(0.0);
+  ret.push_back(0.0);
+  Diag *diag = new Diag("../data/matrix.tsv", 5, 0.85);
+  diag->power_method(vec, ret);
+  // 計算結果を表示
+  for(int i = 0; i < 3; i++){
+    cout << "ret[" << i << "]= " << ret[i] <<endl;
+  }
+  exit(0);
+}
+#endif /*_DEBUG_*/

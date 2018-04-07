@@ -60,7 +60,7 @@ class Diag{
 
   // 冪乗法
   // COO形式読み込まれた行列を冪乗法にて対角化する
-  void power_method(thrust::host_vector<double> &h_x,
+  void power_method(const thrust::host_vector<double> &h_x,
 		    thrust::host_vector<double> &h_y);
   
   // ベクトルの正規化
