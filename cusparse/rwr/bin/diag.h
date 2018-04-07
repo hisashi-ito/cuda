@@ -5,7 +5,7 @@
 // Definition file: diag.cu (definition)
 //
 // 概要: 対角化を実行するクラス
-//       体格鳳凰はPOWER MTHOD のみを扱う
+//       対角化法はPOWER MTHOD のみを扱う
 //       (厳密にはgoogle matrixを対角化する)
 //       
 //       CUDA のポインタ管理には thrustを利用する
@@ -43,17 +43,16 @@ class Diag{
   ~Driag(void);
   
   // 行列の読み込み処理
-  // COO格納形式で読み込むので rows, colums, values の３つの変数に格納する
+  // COO格納形式で読み込むので rows, cols, vals の３つの変数に格納する
   // 各変数はホスト変数として読み込まれる
   void load_matrix(const string file,
 		   thrust::host_vector<int> &rows,
-		   thrust::host_vector<int> &columns,
-		   thrust::host_vector<double> &values);
+		   thrust::host_vector<int> &cols,
+		   thrust::host_vector<double> &vals);
   // split 関数
   vector<string> split(const string &s, char delim);
   
  private:
-  string coo_file; // COO形式の行列(A)ファイル　
   int iteration;   // べき乗法の繰り返し回数
   double alpha;    // アルファパラメータ(G-parameter)
   int nnz;         // 行列(A)の非ゼロ要素の数
@@ -62,8 +61,8 @@ class Diag{
   
   // [ホスト側]
   //  COO形式の行列(A)を保存するための配列
-  thrust::host_vector<double> h_values;
   thrust::host_vector<int> h_rows;
   thrust::host_vector<int> h_cols;
+  thrust::host_vector<double> h_vals;
 };
 /*_DIAG_*/

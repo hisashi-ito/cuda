@@ -5,7 +5,7 @@
 // Header file: dig.h   (header file)
 //
 // 概要: 対角化を実行するクラス
-//       現在は冪情報のみを扱う
+//       対角化法はPOWER MTHOD のみを扱う
 //       (厳密にはさgoogle matrixを対角化する)
 //
 //       CUDA のポインタ管理には thrustを利用する
@@ -16,6 +16,7 @@
 #include 'diag.h'
 
 // @constructor
+//  コンストラクタ
 // @param: coo_file   行列(COO形式)ファイル名
 // @param: iteration  冪情報の繰り返し回数
 // @param: aplha      google パラメータ
@@ -27,7 +28,7 @@ Diag::Diag(const string coo_file, int iteration, double alpha){
   
   // [ホスト側]
   //  COO形式の行列を読み込む 
-  load_matrix(coo_file, this->h_rows, this->h_columns, this->h_values);
+  load_matrix(coo_file, this->h_rows, this->h_cols, this->h_vals);
   
   // デバイス側の準備
   // cuSPARSE のハンドルを作成
@@ -35,16 +36,17 @@ Diag::Diag(const string coo_file, int iteration, double alpha){
   cusparseCreate(&handle);
   
   // non-zero 要素数
-  this->nnz = this->h_values.size();
-  this->row_size = max_element(h_rows.begin(), h_rows.end()) ;      // 変換前の行列の行数(rows)
-  this->col_size = max_element(h_columns.begin(), h_columns.end()); // 変換前の行列の行数(colms)
+  this->nnz = this->h_vals.size();
+  this->row_size = *max_element(h_rows.begin(), h_rows.end()) ; // 変換前の行列の行数(rows)
+  this->col_size = *max_element(h_cols.begin(), h_cols.end());  // 変換前の行列の行数(colms)
   
   // デバイス側でCOO形式のデバイスメモリを取得
-  // ただし、CSR形式への変換はh_values, h_cols は変更必要ない。h_rows だけが変更がなされる
-  thrust::device_vector<double> d_csr_values = h_values;
-  thrust::device_vector<int> d_csr_cols = h_cols;
+  // ただし、CSR形式への変換はh_vals, h_cols は変更必要ない。
+  // h_rows だけが変更がなされる
+  thrust::device_vector<int>    d_csr_cols = h_cols;
+  thrust::device_vector<double> d_csr_vals = h_vals;
   thrust::device_vector<int> d_rows = h_rows;
-  thrust::device_vector<int> d_csr_rows(r_size+1);
+  thrust::device_vector<int> d_csr_rows(this->row_size+1);
   
   // 行列のディスクリプタを記述
   cusparseMatDescr_t matDescr;
@@ -52,61 +54,49 @@ Diag::Diag(const string coo_file, int iteration, double alpha){
   cusparseSetMatType(matDescr, CUSPARSE_MATRIX_TYPE_GENERAL);
   cusparseSetMatIndexBase(matDescr, CUSPARSE_INDEX_BASE_ZERO);
 
-  // COO -> CSR 形式へ変換(rowsだけ)
-  
-  cusparseXcoo2csr(handle,thrust::raw_pointer_cast(&d_rows[0])
-		   ,this->row_size, this->col_size, this->nnz, thrust::raw_pointer_cast(&d_csr_rows[0]),
+  // COO->CSR 形式へ変換(rowsだけ)
+  cusparseXcoo2csr(handle, thrust::raw_pointer_cast(&d_rows[0]),
+		   this->nnz, this->row_size,
+		   thrust::raw_pointer_cast(&d_csr_rows[0]),
 		   CUSPARSE_INDEX_BASE_ZERO);
-
-  
-
 }
 
 // @destructor
-Diag::~Diag(void){}
-
-// @power_method
-Diag::power_method(thrust::host_vector<double> &x, 
-		   thrust::host_vector<double> &ret){
-  // ベクトル情報をGPUへオフロード
-  thrust::device_vector<double> x = x;
-  thrust::device_vector<double> y(x.size());
-  
-  //cuSPARSE のハンドルを作成
-  cusparseHandle_t handle;
-  cusparseCreate(&handle);
-  cusparseMatDescr_t matDescr;
-  cusparseCreateMatDescr(&matDescr);
-  cusparseSetMatType(matDescr, CUSPARSE_MATRIX_TYPE_GENERAL);
-  cusparseSetMatIndexBase(matDescr, CUSPARSE_INDEX_BASE_ZERO);
-  
-  double* _d_csr_values = thrust::raw_pointer_cast(&(d_csr_values[0]));
-  double* _d_csr_cols   = thrust::raw_pointer_cast(&(d_csr_cols[0]));
-  double* _d_csr_rows   = thrust::raw_pointer_cast(&(d_csr_rows[0]));
-  double* _x            = thrust::raw_pointer_cast(&(x[0]));
-  double* _y            = thrust::raw_pointer_cast(&(y[0]));
-  double beta = 1.0 - this->alpha;
-  
-  for(int i = 0; i < this->iteration, i++){
-    // y = alpha * Ax + beta * y
-    cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
-		   );
-  }
-  
-
-		 
-  
+//  デストラクタ
+//
+Diag::~Diag(void){
+  // 行列要素等をfreeすべきだが、thrustを
+  // 利用しているので自動で返却される
 }
 
+// @split
+//  文字列分割関数
+// @breaf 指定のデリミネタを利用してstringの文字列を分割する
+//        分割された文字列は vector<string> 文字列に格納される
+// @param 文字列(string)
+// @param 分割デリミネタ(char)
+// @return 分割された文字列が vector<string>で返却される
+//
+vector<string> Diag::split(const string &s, char delim){
+  vector<string> elems;
+  stringstream ss(s);
+  string item;
+  while (getline(ss, item, delim)) {
+    if (!item.empty()){
+      elems.push_back(item);
+    }
+  }
+  return elems;
+}
 
 // @load_matrix
-// @bref:  COO形式の行列を読み込む。読み込み後は
-//         rows, columns, values に保存される
+//  行列読み込み関数
+// @breaf: COO形式の行列を読み込む。読み込み後はrows, cols, vals に保存される
 // @param: file 行列(COO形式)ファイル名
-// @param: rows, colums, values (COO行列のベクトル)
+// @param: rows, cols, vals (COO行列のベクトル)
 //
 void Diag::load_matrix(const string file, thrust::host_vector<int> &rows, 
-		  thrust::host_vector<int> &columns, thrust::host_vector<double> &values){
+		  thrust::host_vector<int> &cols, thrust::host_vector<double> &vals){
   string buff;
   ifstream ifs(file.c_str());
   if(ifs.fail()){
@@ -128,22 +118,47 @@ void Diag::load_matrix(const string file, thrust::host_vector<int> &rows,
   }
 }
 
-// @split
-//  文字列分割関数
-// @breaf 指定のデリミネタを利用してstringの文字列を分割する
-//        分割された文字列は vector<string> 文字列に格納される
-// @param 文字列(string)
-// @param 分割デリミネタ(char)
-// @return 分割された文字列が vector<string>で返却される
+// @power_method
+//  冪乗法
+// @breaf: 対角化関数、実際にはG-matrix を対角化する
+// @param: 
 //
-vector<string> Diag::split(const string &s, char delim){
-  vector<string> elems;
-  stringstream ss(s);
-  string item;
-  while (getline(ss, item, delim)) {
-    if (!item.empty()){
-      elems.push_back(item);
-    }
+void Diag::power_method(thrust::host_vector<double> &x, 
+		   thrust::host_vector<double> &ret){
+  // ベクトル情報をGPUへオフロード
+  thrust::device_vector<double> x = x;       //  初期ベクトル
+  thrust::device_vector<double> y(x.size()); //　レンポラリベクトル
+  
+  // cuSPARSE のハンドルを作成(必要ないかもしれない) 
+  cusparseHandle_t handle;
+  cusparseCreate(&handle);
+  cusparseMatDescr_t matDescr;
+  cusparseCreateMatDescr(&matDescr);
+  cusparseSetMatType(matDescr, CUSPARSE_MATRIX_TYPE_GENERAL);
+  cusparseSetMatIndexBase(matDescr, CUSPARSE_INDEX_BASE_ZERO);
+  
+  double* _d_csr_vals = thrust::raw_pointer_cast(&(d_csr_vals[0]));
+  double* _d_csr_cols = thrust::raw_pointer_cast(&(d_csr_cols[0]));
+  double* _d_csr_rows = thrust::raw_pointer_cast(&(d_csr_rows[0]));
+  double* _x = thrust::raw_pointer_cast(&(x[0]));
+  double* _y = thrust::raw_pointer_cast(&(y[0]));
+  double beta = 1.0 - this->alpha;
+  
+  for(int i = 0; i < this->iteration, i++){
+    // y = alpha * Ax + beta * y
+
+    // 工事中...
+    cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE);
   }
-  return elems;
+}
+
+// @normalize
+//  行列の正規化関数
+// @breaf: ベクトルを正規化する
+// @param: ベクトル
+//
+void Diag::normalize(thrust::device_vector<double> &v){
+  double norm = sqrt(thrust::inner_product(v.begin(), v.end(), v.begin(), 0.0));
+  using namespace thrust::placeholders;
+  thrust::transform(v.begin(), v.end(), v.begin(), _1 /= norm);
 }
