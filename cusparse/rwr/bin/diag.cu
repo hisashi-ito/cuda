@@ -106,11 +106,12 @@ void Diag::load_matrix(const string file, thrust::host_vector<int> &rows,
 //
 void Diag::power_method(const thrust::host_vector<double> &h_x, 
 			thrust::host_vector<double> &h_y){
+  
   // ベクトル情報をGPUへオフロード
   thrust::device_vector<double> d_x = h_x;
   thrust::device_vector<double> d_y(h_x.size());
   thrust::device_vector<double> d_init_x(h_x.size());
-  
+
   // d_x → d_init_x
   thrust::copy(d_x.begin(), d_x.end(), d_init_x.begin());
   // d_init_x → beta(1-alpha) * d_init_x
