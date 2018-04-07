@@ -120,7 +120,8 @@ void Diag::load_matrix(const string file, thrust::host_vector<int> &rows,
 // @power_method
 //  冪乗法
 // @breaf: 対角化関数、実際にはG-matrix を対角化する
-// @param: 
+// @param: 推薦元の初期ベクトル
+// @param: 計算結果ベクトル(固有Vector) 
 //
 void Diag::power_method(thrust::host_vector<double> &h_x, 
 			thrust::host_vector<double> &h_y){
@@ -157,16 +158,16 @@ void Diag::power_method(thrust::host_vector<double> &h_x,
 		   _d_csr_vals, _d_csr_rows, _d_csr_cols,
 		   _x, &dummy, _y);
     
-    // デバイスポインタの変換
-    x = thrust::raw_pointer_cast(&(_x[0]));
-    y = thrust::raw_pointer_cast(&(_y[0]));
+    // raw ポインタからデバイスポインタへ変換
+    x = thrust::device_pointer_cast(&(_x[0]));
+    y = thrust::device_pointer_cast(&(_y[0]));
     // y += (β * init_x)
     thrust::transform(y.begin(), y.end(), init_x.begin(), y.begin(),thrust::plus<double>());
     // y をnormalizeする
     normalize(y);
     // y → x
     thrust::copy(y.begin(), y.end(), x);
-    // デバイスポインタを元に戻す
+    // デバイスポインタをraw ポインタへ変換
     _x = thrust::raw_pointer_cast(&(x[0]));
     _y = thrust::raw_pointer_cast(&(y[0]));
   }
