@@ -5,12 +5,12 @@
 #include <thrust/transform.h>
 using namespace std;
 
-void addWithThrust(thrust::host_vector<int>& c,
-		   const thrust::host_vector<int>& a,
-		   const thrust::host_vector<int>& b){
-  thrust::device_vector<int> dev_a = a; // copy Host to Device
-  thrust::device_vector<int> dev_b = b; // copy Host to Device
-  thrust::device_vector<int> dev_c(c.size());
+void addWithThrust(thrust::host_vector<double>& c,
+		   const thrust::host_vector<double>& a,
+		   const thrust::host_vector<double>& b){
+  thrust::device_vector<double> dev_a = a; // copy Host to Device
+  thrust::device_vector<double> dev_b = b; // copy Host to Device
+  thrust::device_vector<double> dev_c(c.size());
 
   cout << "ok" << endl;
   
@@ -25,9 +25,9 @@ void addWithThrust(thrust::host_vector<int>& c,
 
 int main(){
   int array_size = 2;
-  thrust::host_vector<int> a(array_size);
-  thrust::host_vector<int> b(array_size);
-  thrust::host_vector<int> c(array_size);
+  thrust::host_vector<double> a(array_size);
+  thrust::host_vector<double> b(array_size);
+  thrust::host_vector<double> c(array_size);
 
   a.push_back(1);
   a.push_back(2);

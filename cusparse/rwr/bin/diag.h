@@ -28,12 +28,10 @@
 #include <cuda_runtime.h>
 #include <cusparse_v2.h>
 #include <thrust/device_vector.h>
-#include <thrust/host_vector.h>
 #include <thrust/device_ptr.h>
+#include <thrust/host_vector.h>
 #include <thrust/inner_product.h>
 #include <thrust/transform.h>
-#include <thrust/functional.h>
-#include <thrust/fill.h>
 #include <thrust/copy.h>
 #include "util.h"
 
@@ -60,8 +58,7 @@ class Diag{
 
   // 冪乗法
   // COO形式読み込まれた行列を冪乗法にて対角化する
-  void power_method(const thrust::host_vector<double> &h_x,
-		    thrust::host_vector<double> &h_y);
+  void power_method(thrust::host_vector<double> &h_x, thrust::host_vector<double> &h_y);
   
   // ベクトルの正規化
   void normalize(thrust::device_vector<double> &v);
