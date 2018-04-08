@@ -26,21 +26,21 @@ Diag::Diag(const string coo_file, int iteration, double alpha){
   this->iteration = iteration;
   this->alpha = alpha;
   this->util  = new Util();
-  
+
   // [ホスト側]
   //  COO形式の行列を読み込む 
   load_matrix(coo_file, this->h_rows, this->h_cols, this->h_vals);
-  
+
   // デバイス側の準備
   // cuSPARSE のハンドルを作成
   cusparseHandle_t handle;
   cusparseCreate(&handle);
-  
+
   // non-zero 要素数
   this->nnz = this->h_vals.size();
   this->row_size = *max_element(h_rows.begin(), h_rows.end()) ; // 変換前の行列の行数(rows)
   this->col_size = *max_element(h_cols.begin(), h_cols.end());  // 変換前の行列の行数(colms)
-  
+
   // デバイス側でCOO形式のデバイスメモリを取得
   // ただし、CSR形式への変換はh_vals, h_cols は変更必要ない。
   // h_rows だけが変更がなされる
@@ -54,12 +54,20 @@ Diag::Diag(const string coo_file, int iteration, double alpha){
   cusparseCreateMatDescr(&matDescr);
   cusparseSetMatType(matDescr, CUSPARSE_MATRIX_TYPE_GENERAL);
   cusparseSetMatIndexBase(matDescr, CUSPARSE_INDEX_BASE_ZERO);
-
+  
   // COO->CSR 形式へ変換(rowsだけ)
-  cusparseXcoo2csr(handle, thrust::raw_pointer_cast(&d_rows[0]),
+  cusparseXcoo2csr(handle,
+		   thrust::raw_pointer_cast(&d_rows[0]),
 		   this->nnz, this->row_size,
 		   thrust::raw_pointer_cast(&d_csr_rows[0]),
 		   CUSPARSE_INDEX_BASE_ZERO);
+
+  //
+  // デバッグ中...
+  for(int i =0; i< d_rows.size(); i++){
+    cout << d_csr_rows[i] << endl;
+  }
+  //
 }
 
 // @destructor
@@ -106,12 +114,8 @@ void Diag::load_matrix(const string file, thrust::host_vector<int> &rows,
 //
 void Diag::power_method(thrust::host_vector<double> &h_x, 
 			thrust::host_vector<double> &h_y){
-  
-  //
-  thrust::host_vector<double> _h_x = h_x;
   // ベクトル情報をGPUへオフロード
-  thrust::device_vector<double> d_x = _h_x;
-  /*
+  thrust::device_vector<double> d_x = h_x;
   thrust::device_vector<double> d_y(h_x.size());
   thrust::device_vector<double> d_init_x(h_x.size());
   
@@ -160,7 +164,6 @@ void Diag::power_method(thrust::host_vector<double> &h_x,
   
   // デバイスから計算結果を返却
   thrust::copy(d_y.begin(), d_y.end(), h_y.begin());
-  */
 }
 
 // @normalize
@@ -187,20 +190,21 @@ void Diag::const_multiplies(thrust::device_vector<double> &v, double alpha){
 
 #ifdef _DEBUG_
 int main(){
-  thrust::host_vector<double> vec(3);
-  thrust::host_vector<double> ret(3);
+  int array_size = 3;
+  thrust::host_vector<double> a(array_size);
+  thrust::host_vector<double> b(array_size);
   // 入力Vectorの初期化
-  vec[0] = 0.01;
-  vec[1] = 0.02;
-  vec[2] = 0.01;
-  ret[0] = 0.0;
-  ret[1] = 0.0;
-  ret[2] = 0.0;
+  a.push_back(1);
+  a.push_back(2);
+  a.push_back(3);
+  b.push_back(1);
+  b.push_back(2);
+  b.push_back(3);
   Diag *diag = new Diag("../data/matrix.tsv", 5, 0.85);
-  diag->power_method(vec, ret);
+  diag->power_method(a, b);
   // 計算結果を表示
   for(int i = 0; i < 3; i++){
-    cout << "ret[" << i << "]= " << ret[i] <<endl;
+    cout << "b[" << i << "]= " << b[i] <<endl;
   }
   exit(0);
 }
