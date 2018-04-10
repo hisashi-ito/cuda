@@ -18,9 +18,11 @@
 #include <cstdlib>
 #include <typeinfo>
 #include <iomanip>
+#include <fstream>
 #include <thrust/host_vector.h>
 #include "diag.h"
 #include "util.h"
+
 using namespace std;
 
 class Rwr{
@@ -42,6 +44,9 @@ class Rwr{
   
   // 実行関数
   void calc();
+
+  // ファイル出力
+  void write();
   
  private:
   // rwrのiteration 回数
@@ -52,9 +57,8 @@ class Rwr{
   string output;
   // 推薦元の初期ベクトル配列
   vector< vector<double> > vecs;
-  // 出力データベクトル
-  thrust::host_vector< thrust::host_vector<double> > results;
-  //vector< vector<double> > results;
+  // 出力データベクトル(stringの配列)
+  vector<string> results;
   // 対角化オブジェクト
   Diag *diag;
   // util オブジェクトへのポインタ

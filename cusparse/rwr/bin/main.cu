@@ -70,9 +70,8 @@ int main(int argc, char *argv[]){
     cerr << "[error] usage: rwr -i <trans_mat> -v <init_vec> -a <alpha> -t <iteration> -o <output>" << endl;
     exit(-1);
   }
-
-  // 対角化の計算を実施
   Rwr *rwr = new Rwr(trans_mat, init_vec, atoi(iteration.c_str()), atof(alpha.c_str()), output);
   rwr->calc();
+  rwr->write();
   exit(0);
 }

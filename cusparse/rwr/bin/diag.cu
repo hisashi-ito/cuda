@@ -89,9 +89,9 @@ void Diag::load_matrix(const string file,
   }
   // 遷移行列の読み込み
   // row, colums でソートされていることを期待します!
-  // フォーマット) row<TAB>column<TAB>value
+  // フォーマット) row,column,value
   while(getline(ifs, buff)){
-    vector<string> elems = this->util->split(buff, '\t');
+    vector<string> elems = this->util->split(buff, ',');
     int row    = atoi(elems[0].c_str());
     int col    = atoi(elems[1].c_str());
     double val = (double)atof(elems[2].c_str());

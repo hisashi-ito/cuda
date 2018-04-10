@@ -36,5 +36,8 @@ class Util{
   
   // split 関数
   vector<string> split(const string &s, char delim);
+  
+  // join 関数
+  string join(vector<double> &v);
 };
 #endif /*_UTIL_*/

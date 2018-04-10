@@ -38,3 +38,22 @@ vector<string> Util::split(const string &s, char delim){
   }
   return elems;
 }
+
+// @join
+//  join関数
+// @breaf ruby等のjoin関数と同等
+// @param vector(double)
+//
+string Util::join(vector<double> &v){
+  string s;
+  for(unsigned int i = 0; i < v.size(); i++){
+    ostringstream oss;
+    oss << v[i];
+    if(i != v.size() - 1){
+      s += oss.str() + ',';
+    }else{
+      s += oss.str();
+    }
+  }
+  return s;
+}

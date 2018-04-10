@@ -33,27 +33,27 @@ void Rwr::calc(){
   for(unsigned int i = 0; i < this->vecs.size(); i++){
     thrust::host_vector<double> vec = vecs[i];
     thrust::host_vector<double> ret(vecs[i].size(), 0.0);
+    vector<double> std_ret(vecs[i].size());
+
     // べき乗法にて対角化する
     diag->power_method(vec, ret);
 
-    /*    
-    string val;
-    for(j = 0; j < ret.size(); j++){
-      ret[i]
-    }
-    
-    // 計算結果をストアする
-    this->results[i] = ret;
-    */
+    // 結果を格納する
+    thrust::copy(ret.begin(), ret.end(), std_ret.begin());
+    string sret = this->util->join(std_ret);
+    this->results.push_back(sret);
   }
 }
 
 // @write
 // @breaf 計算した結果を出力する
-//void Rwr::write(){
-//  
-// 
-//}
+void Rwr::write(){
+  ofstream outputfile(this->output.c_str());
+  for(unsigned int i = 0; i < this->results.size(); i++){
+    outputfile << results[i] << endl;
+  }
+  outputfile.close();
+}
 
 // @load_vec
 // @breaf 推薦元となる初期ベクトルを読み込む
