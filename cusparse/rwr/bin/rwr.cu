@@ -71,15 +71,12 @@ void Rwr::load_vecs(string file, vector< vector<double> > &vecs){
   }
   // 初期ベクトルファイルの読み込み
   // フォーマット) 数値1<SP>数値2...
-  //int cnt = 0;
   while(getline(ifs, buff)){
     vector<string> elems = this->util->split(buff, ' ');
     for(unsigned int i = 0; i < elems.size(); i++){
-      //cout << (double)atof(elems[i].c_str()) << endl;
       tmp.push_back((double)atof(elems[i].c_str()));
     }
     vecs.push_back(tmp);
-    //cnt += 1;
     tmp.clear();
   }
 }
