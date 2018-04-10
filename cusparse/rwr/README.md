@@ -28,3 +28,11 @@ $ ./rwr -i <遷移行列> (COO格納形式) -v <初期ベクトルファイル> 
 0.1,0.2,0.3
 0,0.4,0.8
 ```
+
+##### 補足
+環境によってはcuSPARSEライブラリにライブラリパスが通ってないかもしれませんのでその場合は環境設定で以下の設定を実施しておく。
+```
+LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/usr/local/cuda-7.5/lib64;
+export LD_LIBRARY_PATH
+```
+
