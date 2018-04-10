@@ -1,5 +1,5 @@
 ### Random Walk with Restart (RWR) CUDA実装  
-レコメンドエンジンとして利用されることが多い Random Walk with Restart アルゴリズムの CUDA実装。  
+レコメンドエンジンとして利用されることが多い Random Walk with Restart アルゴリズムの CUDA実装。  
 本プログラムはCOO格納形式で保存された遷移行列と推薦元を表す特徴ベクトルを読み込み当該特徴ベクトルに対応した固有ベクトルを求める。プログラムのCUDAによる実装である。  
 
 CUDAで利用したlibraryとしては cuSPARSE Level2のライブラリである空疎行列と密ベクトルの掛け算のライブラリを利用して実装を行った。その他、ホスト,デバイス側のメモリ管理を簡略化するためにThrustライブラリを利用している。
