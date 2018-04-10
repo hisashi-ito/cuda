@@ -21,13 +21,19 @@
 #include <vector>
 #include <map>
 #include <cstdlib>
+#include <fstream>
 #include <typeinfo>
 #include <iomanip>
+#include <algorithm>
 #include <cuda_runtime.h>
 #include <cusparse_v2.h>
 #include <thrust/device_vector.h>
+#include <thrust/device_ptr.h>
 #include <thrust/host_vector.h>
+#include <thrust/inner_product.h>
+#include <thrust/transform.h>
 #include <thrust/copy.h>
+#include "util.h"
 
 using namespace std;
 
@@ -40,7 +46,7 @@ class Diag{
   Diag(const string coo_file, int iteration, double alpha);
   
   // デストラクタ
-  ~Driag(void);
+  ~Diag(void);
   
   // 行列の読み込み処理
   // COO格納形式で読み込むので rows, cols, vals の３つの変数に格納する
@@ -49,20 +55,35 @@ class Diag{
 		   thrust::host_vector<int> &rows,
 		   thrust::host_vector<int> &cols,
 		   thrust::host_vector<double> &vals);
-  // split 関数
-  vector<string> split(const string &s, char delim);
+
+  // 冪乗法
+  // COO形式読み込まれた行列を冪乗法にて対角化する
+  void power_method(thrust::host_vector<double> &h_x, thrust::host_vector<double> &h_y);
+  
+  // ベクトルの正規化
+  void normalize(thrust::device_vector<double> &v);
+  
+  // 定数の乗算
+  // v = alpha * v
+  void const_multiplies(thrust::device_vector<double> &v, double alpha);
   
  private:
-  int iteration;   // べき乗法の繰り返し回数
+  int iteration;   // 冪情報の繰り返し回数
   double alpha;    // アルファパラメータ(G-parameter)
   int nnz;         // 行列(A)の非ゼロ要素の数
   int row_size;    // 行列(A)の行数
   int col_size;    // 行列(A)の列数
+  Util *util;      // util オブジェクトのポインタ
   
   // [ホスト側]
   //  COO形式の行列(A)を保存するための配列
   thrust::host_vector<int> h_rows;
   thrust::host_vector<int> h_cols;
   thrust::host_vector<double> h_vals;
+  //  CSR形式の行列(A)を保存するための配列
+  thrust::host_vector<int> d_csr_cols;
+  thrust::host_vector<int> d_rows;
+  thrust::host_vector<int> d_csr_rows;
+  thrust::host_vector<double> d_csr_vals;
 };
-/*_DIAG_*/
+#endif /*_DIAG_*/
