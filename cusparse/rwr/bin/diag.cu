@@ -30,7 +30,7 @@ Diag::Diag(const string coo_file, int iteration, double alpha){
   // [ホスト側]
   //  COO形式の行列を読み込む 
   load_matrix(coo_file, this->h_rows, this->h_cols, this->h_vals);
-
+  
   // デバイス側の準備
   // cuSPARSE のハンドルを作成
   cusparseHandle_t handle;
@@ -38,16 +38,16 @@ Diag::Diag(const string coo_file, int iteration, double alpha){
 
   // non-zero 要素数
   this->nnz = this->h_vals.size();
-  this->row_size = *max_element(h_rows.begin(), h_rows.end()) ; // 変換前の行列の行数(rows)
-  this->col_size = *max_element(h_cols.begin(), h_cols.end());  // 変換前の行列の行数(colms)
-
+  this->row_size = *max_element(this->h_rows.begin(), this->h_rows.end()) + 1;  // 変換前の行列の行数(rows)
+  this->col_size = *max_element(this->h_cols.begin(), this->h_cols.end()) + 1;  // 変換前の行列の行数(colms)
+  
   // デバイス側でCOO形式のデバイスメモリを取得
   // ただし、CSR形式への変換はh_vals, h_cols は変更必要ない。
   // h_rows だけが変更がなされる
-  this->d_csr_cols = h_cols;
-  this->d_csr_vals = h_vals;
-  this->d_rows     = h_rows;
-  this->d_csr_rows = thrust::host_vector<int>(this->row_size+1);
+  this->d_csr_cols = thrust::device_vector<int>(this->h_cols);
+  this->d_csr_vals = thrust::device_vector<double>(this->h_vals);
+  this->d_rows     = thrust::device_vector<int>(this->h_rows);
+  this->d_csr_rows = thrust::device_vector<int>(this->row_size+1);
   
   // 行列のディスクリプタを記述
   cusparseMatDescr_t matDescr;
@@ -58,16 +58,10 @@ Diag::Diag(const string coo_file, int iteration, double alpha){
   // COO->CSR 形式へ変換(rowsだけ)
   cusparseXcoo2csr(handle,
 		   thrust::raw_pointer_cast(&d_rows[0]),
-		   this->nnz, this->row_size,
+		   this->nnz,
+		   this->row_size,
 		   thrust::raw_pointer_cast(&d_csr_rows[0]),
 		   CUSPARSE_INDEX_BASE_ZERO);
-
-  //
-  // デバッグ中...
-  for(int i =0; i< d_rows.size(); i++){
-    cout << d_csr_rows[i] << endl;
-  }
-  //
 }
 
 // @destructor
@@ -83,8 +77,10 @@ Diag::~Diag(void){
 // @param: file 行列(COO形式)ファイル名
 // @param: rows, cols, vals (COO行列のベクトル)
 //
-void Diag::load_matrix(const string file, thrust::host_vector<int> &rows, 
-		       thrust::host_vector<int> &cols, thrust::host_vector<double> &vals){
+void Diag::load_matrix(const string file, 
+		       thrust::host_vector<int> &rows, 
+		       thrust::host_vector<int> &cols,
+		       thrust::host_vector<double> &vals){
   string buff;
   ifstream ifs(file.c_str());
   if(ifs.fail()){
@@ -99,6 +95,7 @@ void Diag::load_matrix(const string file, thrust::host_vector<int> &rows,
     int row    = atoi(elems[0].c_str());
     int col    = atoi(elems[1].c_str());
     double val = (double)atof(elems[2].c_str());
+    
     // vector へpushする
     rows.push_back(row);
     cols.push_back(col);
@@ -118,8 +115,7 @@ void Diag::power_method(thrust::host_vector<double> &h_x,
   thrust::device_vector<double> d_x = h_x;
   thrust::device_vector<double> d_y(h_x.size());
   thrust::device_vector<double> d_init_x(h_x.size());
-  
-  // d_x → d_init_x
+  // d_x -> d_init_x
   thrust::copy(d_x.begin(), d_x.end(), d_init_x.begin());
   // d_init_x → beta(1-alpha) * d_init_x
   double beta = 1.0 - this->alpha;
@@ -141,7 +137,7 @@ void Diag::power_method(thrust::host_vector<double> &h_x,
   double dummy = 0.0;
   
   for(int i = 0; i < this->iteration; i++){
-    // y = α ∗ A ∗ x + (0 * y)
+    // y = alpha ∗ A ∗ x + (0 * y)
     cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
 		   this->row_size, this->col_size, this->nnz,
 		   &this->alpha, matDescr,
@@ -155,13 +151,12 @@ void Diag::power_method(thrust::host_vector<double> &h_x,
     thrust::transform(d_y.begin(), d_y.end(), d_init_x.begin(), d_y.begin(),thrust::plus<double>());
     // y をnormalizeする
     normalize(d_y);
-    // y → x
+    // y -> x
     thrust::copy(d_y.begin(), d_y.end(), d_x.begin());
     // デバイスポインタをraw ポインタへ変換
     _d_x = thrust::raw_pointer_cast(&(d_x[0]));
     _d_y = thrust::raw_pointer_cast(&(d_y[0]));
   }
-  
   // デバイスから計算結果を返却
   thrust::copy(d_y.begin(), d_y.end(), h_y.begin());
 }
@@ -193,13 +188,13 @@ int main(){
   int array_size = 3;
   thrust::host_vector<double> a(array_size);
   thrust::host_vector<double> b(array_size);
-  // 入力Vectorの初期化
-  a.push_back(1);
-  a.push_back(2);
-  a.push_back(3);
-  b.push_back(1);
-  b.push_back(2);
-  b.push_back(3);
+  // 入力 vectorの初期化
+  a[0] = 0.1;
+  a[1] = 0.2;
+  a[2] = 0.3;
+  b[0] = 0.0;
+  b[1] = 0.0;
+  b[2] = 0.0;
   Diag *diag = new Diag("../data/matrix.tsv", 5, 0.85);
   diag->power_method(a, b);
   // 計算結果を表示

@@ -15,16 +15,12 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <map>
 #include <cstdlib>
 #include <typeinfo>
 #include <iomanip>
-#include <cuda_runtime.h>
-#include <cusparse_v2.h>
-#include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
-#include <thrust/copy.h>
-#incldue "diag.h"
+#include "diag.h"
+#include "util.h"
 using namespace std;
 
 class Rwr{
@@ -32,24 +28,36 @@ class Rwr{
   // コンストラクタ
   // coo_file:    行列ファイル名(COO格納方式)
   // vector_file: 推薦元データのベクトル
-  // iteration: 繰り返し回数
-  // alpha:     G-parameter
+  // iteration:   繰り返し回数
+  // alpha:       G-parameter
+  // output:      出力ファイル名
   // 
-  Rwr(const string coo_file, const string vec_file,
-      int iteration, double alpha);
+  Rwr(string coo_file, string vec_file, int iteration, double alpha, string output);
   
   // デストラクタ
-  ~RWR(void);
-  
-  // split 関数
-  vector<string> split(const string &s, char delim);
+  ~Rwr(void);
   
   // 推薦元のベクトル読み込み
   void load_vecs(string file, vector< vector<double> > &vecs);
   
+  // 実行関数
+  void calc();
+  
  private:
-  int iteration;                 // rwrのiteration 回数
-  double alpha;                  // G-marix の係数
-  vector< vector<double> > vecs; // 推薦元の初期ベクトル配列
+  // rwrのiteration 回数
+  int iteration;
+  // G-marix の係数
+  double alpha;
+  // 出力ファイル名
+  string output;
+  // 推薦元の初期ベクトル配列
+  vector< vector<double> > vecs;
+  // 出力データベクトル
+  thrust::host_vector< thrust::host_vector<double> > results;
+  //vector< vector<double> > results;
+  // 対角化オブジェクト
+  Diag *diag;
+  // util オブジェクトへのポインタ
+  Util *util;
 };
-#endif /*_RER_*/
+#endif /*_RWR_*/

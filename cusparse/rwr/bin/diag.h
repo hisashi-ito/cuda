@@ -80,10 +80,11 @@ class Diag{
   thrust::host_vector<int> h_rows;
   thrust::host_vector<int> h_cols;
   thrust::host_vector<double> h_vals;
+  // [デバイス側]
   //  CSR形式の行列(A)を保存するための配列
-  thrust::host_vector<int> d_csr_cols;
-  thrust::host_vector<int> d_rows;
-  thrust::host_vector<int> d_csr_rows;
-  thrust::host_vector<double> d_csr_vals;
+  thrust::device_vector<int> d_csr_cols;
+  thrust::device_vector<int> d_rows;
+  thrust::device_vector<int> d_csr_rows;
+  thrust::device_vector<double> d_csr_vals;
 };
 #endif /*_DIAG_*/
