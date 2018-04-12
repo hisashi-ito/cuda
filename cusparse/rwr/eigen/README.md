@@ -9,5 +9,5 @@ http://eigen.tuxfamily.org/index.php?title=Main_Page
 最新版は Eigen 3.3.4 で本ライブラリはヘッダファイルのみで提供されるのでコンパイル時にインクルードするだけで利用できる点が便利である。    
 
 参考文献  (暗黒通信団)  
-http://ankokudan.org/d/dl/pdf/pdf-eigennote.pdf  
-クラスの命名規則については非常に明快である。  
+http://ankokudan.org/d/dl/pdf/pdf-eigennote.pdf  
+クラスの命名規則については非常に明快である。  
