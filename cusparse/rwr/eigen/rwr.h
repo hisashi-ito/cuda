@@ -6,8 +6,8 @@
 //
 // 概要: Random Walk with Restart (RWR)の計算を制御するクラス
 //       CUDA版の実装との差分は definition ファイルが cpp であり
+//       thrust のヘッダ等を利用しないこと。
 //       
-//
 // 更新履歴: 
 //          2018.04.12 新規作成
 //
@@ -21,7 +21,6 @@
 #include <typeinfo>
 #include <iomanip>
 #include <fstream>
-#include <thrust/host_vector.h>
 #include "diag.h"
 #include "util.h"
 
