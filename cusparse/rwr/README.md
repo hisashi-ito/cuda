@@ -10,7 +10,7 @@ $ cd bin
 $ make
 ```
 コンパイル時にはGPUアーキテクチャを指定するオプション(-arch)が指定できる。このオプションは利用環境に依存する。  
-どのようなオプションを押下するかは以下のWEBで記載されている。  h
+どのようなオプションを押下するかは以下のWEBで記載されている。  
 http://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/  
 
 引用すると以下のようになっている  
