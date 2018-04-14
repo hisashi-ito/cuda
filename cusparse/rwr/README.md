@@ -6,7 +6,7 @@ CUDAで利用したlibraryとしては cuSPARSE Level2のライブラリであ�
 
 ##### コンパイル方法
 ```
-$ cd bin 
+$ cd cuda 
 $ make
 ```
 コンパイル時にはGPUアーキテクチャを指定するオプション(-arch)が指定できる。このオプションは利用環境に依存する。  
