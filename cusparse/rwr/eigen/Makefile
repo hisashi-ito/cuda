@@ -7,8 +7,8 @@ OBJECT   = main.o rwr.o diag.o util.o
 PROGRAM  = rwr
 
 ${PROGRAM} : ${OBJECT}
-	${CC} -o $@ ${OBJECT} -I ${INCLUDE} 
+	${CC} -o $@ ${OBJECT} -I ${INCLUDE} ${OPTIMIZE} 
 .cpp.o :
-	${CC} -c $< ${CFLAGS} -I ${INCLUDE} 
+	${CC} -c $< ${CFLAGS} -I ${INCLUDE} ${OPTIMIZE}
 clean:
 	rm ${PROGRAM} ${OBJECT}
