@@ -11,8 +11,8 @@ PROGRAM  = rwr
 ${PROGRAM}:${OBJECT}
 	${CC} -o $@ ${OBJECT} ${WALL} ${GFLAGS} ${OPTIMIZE} ${LINK}
 .cu.o:
-	${CC} -c $< ${WALL} ${GFLAGS} ${OPTIMIZE} ${LINK}
+	${CC} -c $< ${WALL} ${GFLAGS} ${OPTIMIZE}
 .cpp.o:
-	${CC} -c $< ${WALL} ${GFLAGS} ${OPTIMIZE} ${LINK}
+	${CC} -c $< ${WALL} ${GFLAGS} ${OPTIMIZE}
 clean:
 	rm ${PROGRAM} ${OBJECT}
