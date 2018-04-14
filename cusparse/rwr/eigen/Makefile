@@ -1,8 +1,14 @@
 # Make file for rwr (Eigen版)
-CC=g++
-INCLUDE=../eigen/lib/eigen3.3.4
-OPT=-std=c++11
-csrmv:
-	${CC} -Wall -o rwr main.cpp rwr.cpp diag.cpp util.cpp -I ${INCLUDE} ${OPT}
+CC       = g++
+CFLAGS   = -std=c++11
+OPTIMIZE = -O3
+INCLUDE  = ../eigen/lib/eigen3.3.4
+OBJECT   = main.o rwr.o diag.o util.o
+PROGRAM  = rwr
+
+${PROGRAM} : ${OBJECT}
+	${CC} -o $@ ${OBJECT} -I ${INCLUDE} 
+.cpp.o :
+	${CC} -c $< ${CFLAGS} -I ${INCLUDE} 
 clean:
-	rm rwr
+	rm ${PROGRAM} ${OBJECT}
