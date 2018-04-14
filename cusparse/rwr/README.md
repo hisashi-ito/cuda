@@ -85,3 +85,6 @@ rwrを計算するときにハイパーパラメータ。0から1までのdouble
 LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/usr/local/cuda-7.5/lib64;
 export LD_LIBRARY_PATH
 ```
+
+
+![cuda_eigen](https://user-images.githubusercontent.com/8604827/38763042-bd7c9862-3fce-11e8-8a30-0cd64ae2afa5.jpg)
