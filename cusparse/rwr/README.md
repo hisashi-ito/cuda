@@ -85,6 +85,24 @@ rwrを計算するときにハイパーパラメータ。0から1までのdouble
 LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/usr/local/cuda-7.5/lib64;
 export LD_LIBRARY_PATH
 ```
+##### benchmark  
+cuda実装のものとeigen3実装のrwrのコードを作成したので、同じファイルを読み込み計算時間を両者で評価した。
+1. 実験環境  
+Jetson TK2
+GPU: NVIDIA Pascal, 256 NVIDIA CUDA Cores  
+CPU: Dual Denver 2/2MB L2 +Quad ARM® A57/2MB L2  
+2. 実験環境
+```
+遷移行列サイズ: 93,751 x 93,750  
+推定データ数: 100  
+べき乗法の繰り返し回数(iteration): 30  
+alpha: 0.85  
+```
+3. 実験パラメータ  
+[1] CPU(einge3)で最適化なし  
+[2] CPU(einge3)でO3最適化  
+[3] GPU(cuda)で最適化なし  
+[4] GPU(cuda)でO3最適化  
 
-
+4. 結果
 ![cuda_eigen](https://user-images.githubusercontent.com/8604827/38763042-bd7c9862-3fce-11e8-8a30-0cd64ae2afa5.jpg)
