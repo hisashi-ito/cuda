@@ -88,9 +88,10 @@ export LD_LIBRARY_PATH
 ##### benchmark  
 cuda実装のものとeigen3実装のrwrのコードを作成したので、同じファイルを読み込み計算時間を両者で評価した。
 1. 実験環境  
-Jetson TK2
+Jetson TK2  
 GPU: NVIDIA Pascal, 256 NVIDIA CUDA Cores  
 CPU: Dual Denver 2/2MB L2 +Quad ARM® A57/2MB L2  
+
 2. 実験環境
 ```
 遷移行列サイズ: 93,751 x 93,750  
