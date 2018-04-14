@@ -109,4 +109,3 @@ alpha: 0.85
 <img src="https://user-images.githubusercontent.com/8604827/38763042-bd7c9862-3fce-11e8-8a30-0cd64ae2afa5.jpg" width="600px">
 </p>
 基本的にはGPU実装が速いがeigen3の最適化後もかなり高速。
-```
