@@ -10,9 +10,11 @@ $ cd bin
 $ make
 ```
 コンパイル時にはGPUアーキテクチャを指定するオプション(-arch)が指定できる。このオプションは利用環境に依存する。  
-どのようなオプションを押下するかは以下のWEBで記載されている。
-http://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/　　
-引用すると以下のようになっている。
+どのようなオプションを押下するかは以下のWEBで記載されている。  h
+http://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/  
+
+引用すると以下のようになっている  
+
 ```
 Fermi (CUDA 3.2 and later, deprecated from CUDA 9):
 SM20 or SM_20, compute_30 – Older cards such as GeForce 400, 500, 600, GT-630
@@ -36,7 +38,8 @@ SM70 or SM_70, compute_70 – Tesla V100
 SM71 or SM_71, compute_71 – probably not implemented
 SM72 or SM_72, compute_72 – currently unknown
 ```
-本プログラムでは自分の環境である SM62 を指定している。
+
+本プログラムでは自分の環境である SM62 を指定している。　　
 
 ※ 実行環境に nvcc および、 cuSPARSEがインストールされていることを想定とします。
 
