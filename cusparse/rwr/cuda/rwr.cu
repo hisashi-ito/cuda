@@ -8,16 +8,19 @@
 //
 // 更新履歴:
 //          2018.04.10 新規作成
+//          2018.04.17 推薦ベクトルの入力をminibach に変更する
 //
 #include "rwr.h"
 
 // @constructor
 //  コンストラクタ
-Rwr::Rwr(string coo_file, string vec_file,int iteration, double alpha, string output){
+Rwr::Rwr(string coo_file, string vec_file,int iteration,
+	 double alpha, string output, int batch_num){
   // インスタンス変数の格納(一旦保存しておく)
   this->iteration = iteration;
   this->alpha     = alpha;
   this->output    = output;
+  this->batch_num = batch_num;
   this->util      = new Util();
   load_vecs(vec_file, this->vecs);                   // 推薦元ベクトル配列の読み込み
   this->diag = new Diag(coo_file, iteration, alpha); // 対角化インスタンスを作成
@@ -27,8 +30,19 @@ Rwr::Rwr(string coo_file, string vec_file,int iteration, double alpha, string ou
 Rwr::~Rwr(void){}
 
 // @calc
-// @breaf 対角化を実施 
+// @breaf 対角化を実施
+//        推薦元ベクトルの計算時に1個つづ処理するのではなく
+//        ミニバッチで指定した個数づつをGPUメモリに転送して処理する
+//
 void Rwr::calc(){
+  // mini_batch loop
+  for(unsigned int i = 0; i < (int)(this->vecs.size()/batch_num); i ++){
+
+    // 工事中...
+    
+  }
+
+  
   // 入力ベクトル毎(推薦レコード毎)に対角化を実施
   for(unsigned int i = 0; i < this->vecs.size(); i++){
     thrust::host_vector<double> vec = vecs[i];

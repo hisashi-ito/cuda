@@ -8,6 +8,7 @@
 //
 // 更新履歴: 
 //          2018.04.07 新規作成
+//          2018.04.17 ミニバッチの設定を追加
 //
 #ifndef _RWR_
 #define _RWR_
@@ -33,8 +34,10 @@ class Rwr{
   // iteration:   繰り返し回数
   // alpha:       G-parameter
   // output:      出力ファイル名
-  // 
-  Rwr(string coo_file, string vec_file, int iteration, double alpha, string output);
+  // batch_num:   ミニバッチ数
+  //
+  Rwr(string coo_file, string vec_file, int iteration,
+      double alpha, string output, int batch_num);
   
   // デストラクタ
   ~Rwr(void);
@@ -55,6 +58,8 @@ class Rwr{
   double alpha;
   // 出力ファイル名
   string output;
+  // ミニバッチ数
+  int batch_num;
   // 推薦元の初期ベクトル配列
   vector< vector<double> > vecs;
   // 出力データベクトル(stringの配列)
