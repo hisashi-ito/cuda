@@ -100,8 +100,8 @@ CPU: Dual Denver 2/2MB L2 +Quad ARM® A57/2MB L2
 alpha: 0.85  
 ```
 3. 実験パラメータ  
-[1] CPU(einge3)で最適化なし  
-[2] CPU(einge3)でO3最適化  
+[1] CPU(eigen3)で最適化なし  
+[2] CPU(eigen3)でO3最適化  
 [3] GPU(cuda)で最適化なし  
 [4] GPU(cuda)でO3最適化  
 
