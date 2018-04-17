@@ -12,6 +12,8 @@
 //
 // 更新履歴: 
 //          2018.04.03 新規作成
+//          2018.04.17 power_method の引数に
+//                     推薦元ベクトルサイズを設定
 //
 #ifndef _DIAG_
 #define _DIAG_
@@ -58,7 +60,9 @@ class Diag{
 
   // 冪乗法
   // COO形式読み込まれた行列を冪乗法にて対角化する
-  void power_method(thrust::host_vector<double> &h_x, thrust::host_vector<double> &h_y);
+  void power_method(thrust::host_vector<double> &h_x,
+		    thrust::host_vector<double> &h_y,
+		    int vec_size);
   
   // ベクトルの正規化
   void normalize(thrust::device_vector<double> &v);

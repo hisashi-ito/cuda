@@ -47,6 +47,11 @@ class Rwr{
   
   // 実行関数
   void calc();
+  
+  // 対角化関数
+  void diagonalize(thrust::host_vector<double> vec,
+		   thrust::host_vector<double> ret,
+		   int vec_size);
 
   // ファイル出力
   void write();
@@ -59,7 +64,9 @@ class Rwr{
   // 出力ファイル名
   string output;
   // ミニバッチ数
-  int batch_num;
+  unsigned int batch_size;
+  // 推薦元ベクトルのサイズ
+  int vec_size;
   // 推薦元の初期ベクトル配列
   vector< vector<double> > vecs;
   // 出力データベクトル(stringの配列)

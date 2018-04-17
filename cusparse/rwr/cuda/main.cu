@@ -10,10 +10,12 @@
 //             -v <初期ベクトルファイル>
 //             -a <rwr のalpha パラメータ> 
 //             -t <iteration回数>
+//             -b <batch size 個数>
 //             -o <出力>
 //
 //  更新履歴:
 //           2018.04.02 新規作成
+//           2018.04.17 バッチサイズを指定可能とする
 //
 #include <stdio.h>
 #include <unistd.h>
@@ -39,10 +41,11 @@ int main(int argc, char *argv[]){
   string init_vec;   // 初期べベクトルファイル
   string alpha;      // alpha パラメータ ・・・ google matrix parameter
   string iteration;  // 対角化時の繰り返し回数
+  string batch_size; // バッチサイズ
   string output;     // 出力ファイル
   
   // 引数parse
-  while((opt = getopt(argc, argv,"i:v:o:a:t:")) != -1){
+  while((opt = getopt(argc, argv,"i:v:o:a:t:b:")) != -1){
     switch(opt){
     case 'i':
       trans_mat = optarg;
@@ -59,18 +62,21 @@ int main(int argc, char *argv[]){
     case 'o':
       output = optarg;
       break;
+    case 'b':
+      batch_size = optarg;
+      break;
     case ':':  // no value applied
     case '?':  // invalid option
       exit(1);
     }
   }
-  
   // 引数不正の場合,usage を出して終了
-  if(trans_mat.empty() || init_vec.empty() || alpha.empty() || iteration.empty() || output.empty()){
-    cerr << "[error] usage: rwr -i <trans_mat> -v <init_vec> -a <alpha> -t <iteration> -o <output>" << endl;
+  if(trans_mat.empty() || init_vec.empty() || alpha.empty() || iteration.empty() || output.empty() || batch_size.empty()){
+    cerr << "[error] usage: rwr -i <trans_mat> -v <init_vec> -a <alpha> -t <iteration> -o <output> -b <batch_size>" << endl;
     exit(-1);
   }
-  Rwr *rwr = new Rwr(trans_mat, init_vec, atoi(iteration.c_str()), atof(alpha.c_str()), output);
+  Rwr *rwr = new Rwr(trans_mat, init_vec, atoi(iteration.c_str()),
+		     atof(alpha.c_str()), output, atoi(batch_size.c_str()));
   rwr->calc();
   rwr->write();
   exit(0);

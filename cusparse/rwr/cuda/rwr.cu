@@ -15,13 +15,13 @@
 // @constructor
 //  コンストラクタ
 Rwr::Rwr(string coo_file, string vec_file,int iteration,
-	 double alpha, string output, int batch_num){
+	 double alpha, string output, int batch_size){
   // インスタンス変数の格納(一旦保存しておく)
-  this->iteration = iteration;
-  this->alpha     = alpha;
-  this->output    = output;
-  this->batch_num = batch_num;
-  this->util      = new Util();
+  this->iteration  = iteration;
+  this->alpha      = alpha;
+  this->output     = output;
+  this->batch_size = batch_size;
+  this->util       = new Util();
   load_vecs(vec_file, this->vecs);                   // 推薦元ベクトル配列の読み込み
   this->diag = new Diag(coo_file, iteration, alpha); // 対角化インスタンスを作成
 }
@@ -33,27 +33,58 @@ Rwr::~Rwr(void){}
 // @breaf 対角化を実施
 //        推薦元ベクトルの計算時に1個つづ処理するのではなく
 //        ミニバッチで指定した個数づつをGPUメモリに転送して処理する
-//
 void Rwr::calc(){
-  // mini_batch loop
-  for(unsigned int i = 0; i < (int)(this->vecs.size()/batch_num); i ++){
-
-    // 工事中...
-    
-  }
-
-  
-  // 入力ベクトル毎(推薦レコード毎)に対角化を実施
+  // 入力ベクトル毎にバッチサイズに基づいてベクトルバッチを作成
+  unsigned int cnt = 0;
+  thrust::host_vector<double> vec;
+  thrust::host_vector<double> ret;
   for(unsigned int i = 0; i < this->vecs.size(); i++){
-    thrust::host_vector<double> vec = vecs[i];
-    thrust::host_vector<double> ret(vecs[i].size(), 0.0);
-    vector<double> std_ret(vecs[i].size());
+    if(cnt < this->batch_size){
+      // vecs 情報を1次元配列にマッピング
+      for(unsigned int j = 0; j < this->vecs[i].size(); j++){
+	vec.push_back(this->vecs[i][j]);
+	ret.push_back(0.0);
+      }
+      cnt += 1;
+    }else{
+      // バッチサイズの上限に達したので
+      // べき乗法にて対角化する
+      diag->power_method(vec, ret, this->vec_size);
+      for(int j = 0; j < (int)ret.size()/this->vec_size; j++){
+	cout << j << endl;
+	thrust::copy(ret.begin()+(j*this->vec_size), ret.begin()+(j*this->vec_size), std_ret.begin());
+	string sret = this->util->join(std_ret);
+	this->results.push_back(sret);
+      }
+      cnt = 0;
+    }
+  }
+  // 余剰部分データを処理
+  if(cnt != 0){
+    diagonalize(vec, ret, this->vec_size);
+    /*
+      diag->power_method(vec, ret, this->vec_size);
+      for(int j = 0; j < (int)ret.size()/this->vec_size; j++){
+      int begin = j*this->vec_size;
+      int end   = begin + this->vec_size - 1; 
+      thrust::copy(ret.begin () + begin, ret.begin() + end, std_ret.begin());
+      string sret = this->util->join(std_ret);
+      this->results.push_back(sret);
+    */
+  }
+}
 
-    // べき乗法にて対角化する
-    diag->power_method(vec, ret);
-
-    // 結果を格納する
-    thrust::copy(ret.begin(), ret.end(), std_ret.begin());
+// @diagonalize
+//  対角化実行
+// @break 対角化実行関数
+//
+void Rwr::diagonalize(thrust::host_vector<double> vec,thrust::host_vector<double> ret,int vec_size){
+  vector<double> std_ret(vec_size);
+  this->diag->power_method(vec, ret, vec_size);
+  for(int j = 0; j < (int)ret.size()/vec_size; j++){
+    int begin = j*vec_size;
+    int end   = begin + vec_size - 1;
+    thrust::copy(ret.begin () + begin, ret.begin() + end, std_ret.begin());
     string sret = this->util->join(std_ret);
     this->results.push_back(sret);
   }
@@ -87,6 +118,10 @@ void Rwr::load_vecs(string file, vector< vector<double> > &vecs){
   // フォーマット) 数値1<SP>数値2...
   while(getline(ifs, buff)){
     vector<string> elems = this->util->split(buff, ',');
+    // ベクトルのサイズを保存取得しておく(初回だけ保存)
+    if(this->vec_size == 0)
+      this->vec_size = elems.size();
+    
     for(unsigned int i = 0; i < elems.size(); i++){
       tmp.push_back((double)atof(elems[i].c_str()));
     }

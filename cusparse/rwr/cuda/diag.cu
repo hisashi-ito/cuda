@@ -12,6 +12,7 @@
 //
 // 更新履歴:
 //          2018.04.03 新規作成
+//          201
 //
 #include "diag.h"
 
@@ -106,59 +107,76 @@ void Diag::load_matrix(const string file,
 // @power_method
 //  冪乗法
 // @breaf: 対角化関数、実際にはG-matrix を対角化する
+//         推薦データを作成するためにバッチ処理に対応する
 // @param: 推薦元の初期ベクトル
 // @param: 計算結果ベクトル(固有Vector) 
+// @param: 推薦元ベクトルのサイズ
 //
 void Diag::power_method(thrust::host_vector<double> &h_x, 
-			thrust::host_vector<double> &h_y){
+			thrust::host_vector<double> &h_y,
+			int vec_size){
   // ベクトル情報をGPUへオフロード
-  thrust::device_vector<double> d_x = h_x;
-  thrust::device_vector<double> d_y(h_x.size());
-  thrust::device_vector<double> d_init_x(h_x.size());
-  // d_x -> d_init_x
-  thrust::copy(d_x.begin(), d_x.end(), d_init_x.begin());
-  // d_init_x → beta(1-alpha) * d_init_x
-  double beta = 1.0 - this->alpha;
-  const_multiplies(d_init_x, beta);
+  thrust::device_vector<double> batch_d_x = h_x;
   
-  // cuSPARSE のハンドルを作成(必要ないかもしれない) 
-  cusparseHandle_t handle;
-  cusparseCreate(&handle);
-  cusparseMatDescr_t matDescr;
-  cusparseCreateMatDescr(&matDescr);
-  cusparseSetMatType(matDescr, CUSPARSE_MATRIX_TYPE_GENERAL);
-  cusparseSetMatIndexBase(matDescr, CUSPARSE_INDEX_BASE_ZERO);
-  
-  double* _d_x = thrust::raw_pointer_cast(&(d_x[0]));
-  double* _d_y = thrust::raw_pointer_cast(&(d_y[0]));
-  double* _d_csr_vals = thrust::raw_pointer_cast(&(this->d_csr_vals[0]));
-  int* _d_csr_cols = thrust::raw_pointer_cast(&(this->d_csr_cols[0]));
-  int* _d_csr_rows = thrust::raw_pointer_cast(&(this->d_csr_rows[0]));
-  double dummy = 0.0;
-  
-  for(int i = 0; i < this->iteration; i++){
-    // y = alpha ∗ A ∗ x + (0 * y)
-    cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-		   this->row_size, this->col_size, this->nnz,
-		   &this->alpha, matDescr,
-		   _d_csr_vals, _d_csr_rows, _d_csr_cols,
-		   _d_x, &dummy, _d_y);
+  // １つのバッチに含まれるベクトルの本数を調査
+  int batch_size = (int)h_x.size()/vec_size;
     
-    // raw ポインタからデバイスポインタへ変換
-    &d_x[0] = thrust::device_pointer_cast(&(_d_x[0]));
-    &d_y[0] = thrust::device_pointer_cast(&(_d_y[0]));
-    // y += (β * init_x)
-    thrust::transform(d_y.begin(), d_y.end(), d_init_x.begin(), d_y.begin(),thrust::plus<double>());
-    // y をnormalizeする
-    normalize(d_y);
-    // y -> x
-    thrust::copy(d_y.begin(), d_y.end(), d_x.begin());
-    // デバイスポインタをraw ポインタへ変換
-    _d_x = thrust::raw_pointer_cast(&(d_x[0]));
-    _d_y = thrust::raw_pointer_cast(&(d_y[0]));
+  // ミニバッチ処理 
+  for(int i = 0; i < batch_size; i++){
+    thrust::device_vector<double> d_x(vec_size);
+    thrust::device_vector<double> d_y(vec_size);
+    thrust::device_vector<double> d_init_x(vec_size);
+    for(int j = 0; j < vec_size; j++){
+      d_x[j] = batch_d_x[i * batch_size + j];
+      d_y[j] = 0.0;
+      d_init_x[j] = 0.0;
+    }
+    
+    // d_x -> d_init_x
+    thrust::copy(d_x.begin(), d_x.end(), d_init_x.begin());
+    // d_init_x → beta(1-alpha) * d_init_x
+    double beta = 1.0 - this->alpha;
+    const_multiplies(d_init_x, beta);
+  
+    // cuSPARSE のハンドルを作成(必要ないかもしれない) 
+    cusparseHandle_t handle;
+    cusparseCreate(&handle);
+    cusparseMatDescr_t matDescr;
+    cusparseCreateMatDescr(&matDescr);
+    cusparseSetMatType(matDescr, CUSPARSE_MATRIX_TYPE_GENERAL);
+    cusparseSetMatIndexBase(matDescr, CUSPARSE_INDEX_BASE_ZERO);
+  
+    double* _d_x = thrust::raw_pointer_cast(&(d_x[0]));
+    double* _d_y = thrust::raw_pointer_cast(&(d_y[0]));
+    double* _d_csr_vals = thrust::raw_pointer_cast(&(this->d_csr_vals[0]));
+    int* _d_csr_cols = thrust::raw_pointer_cast(&(this->d_csr_cols[0]));
+    int* _d_csr_rows = thrust::raw_pointer_cast(&(this->d_csr_rows[0]));
+    double dummy = 0.0;
+  
+    for(int j = 0; j < this->iteration; j++){
+      // y = alpha ∗ A ∗ x + (0 * y)
+      cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+		     this->row_size, this->col_size, this->nnz,
+		     &this->alpha, matDescr,
+		     _d_csr_vals, _d_csr_rows, _d_csr_cols,
+		     _d_x, &dummy, _d_y);
+    
+      // raw ポインタからデバイスポインタへ変換
+      &d_x[0] = thrust::device_pointer_cast(&(_d_x[0]));
+      &d_y[0] = thrust::device_pointer_cast(&(_d_y[0]));
+      // y += (β * init_x)
+      thrust::transform(d_y.begin(), d_y.end(), d_init_x.begin(), d_y.begin(),thrust::plus<double>());
+      // y をnormalizeする
+      normalize(d_y);
+      // y -> x
+      thrust::copy(d_y.begin(), d_y.end(), d_x.begin());
+      // デバイスポインタをraw ポインタへ変換
+      _d_x = thrust::raw_pointer_cast(&(d_x[0]));
+      _d_y = thrust::raw_pointer_cast(&(d_y[0]));
+    }
+    // デバイスから計算結果を返却
+    thrust::copy(d_y.begin(), d_y.end(), h_y.begin() + (i * vec_size));
   }
-  // デバイスから計算結果を返却
-  thrust::copy(d_y.begin(), d_y.end(), h_y.begin());
 }
 
 // @normalize
