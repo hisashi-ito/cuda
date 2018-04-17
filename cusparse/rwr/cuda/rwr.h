@@ -49,10 +49,10 @@ class Rwr{
   void calc();
   
   // 対角化関数
-  void diagonalize(thrust::host_vector<double> vec,
-		   thrust::host_vector<double> ret,
+  void diagonalize(thrust::host_vector<double> &vec,
+		   thrust::host_vector<double> &ret,
 		   int vec_size);
-
+  
   // ファイル出力
   void write();
   

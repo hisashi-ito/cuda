@@ -47,38 +47,22 @@ void Rwr::calc(){
       }
       cnt += 1;
     }else{
-      // バッチサイズの上限に達したので
-      // べき乗法にて対角化する
-      diag->power_method(vec, ret, this->vec_size);
-      for(int j = 0; j < (int)ret.size()/this->vec_size; j++){
-	cout << j << endl;
-	thrust::copy(ret.begin()+(j*this->vec_size), ret.begin()+(j*this->vec_size), std_ret.begin());
-	string sret = this->util->join(std_ret);
-	this->results.push_back(sret);
-      }
+      // バッチサイズの上限に達したのでべき乗法にて対角化する
+      diagonalize(vec, ret, this->vec_size);
       cnt = 0;
     }
   }
   // 余剰部分データを処理
-  if(cnt != 0){
-    diagonalize(vec, ret, this->vec_size);
-    /*
-      diag->power_method(vec, ret, this->vec_size);
-      for(int j = 0; j < (int)ret.size()/this->vec_size; j++){
-      int begin = j*this->vec_size;
-      int end   = begin + this->vec_size - 1; 
-      thrust::copy(ret.begin () + begin, ret.begin() + end, std_ret.begin());
-      string sret = this->util->join(std_ret);
-      this->results.push_back(sret);
-    */
-  }
+  if(cnt != 0){ diagonalize(vec, ret, this->vec_size);}
 }
 
 // @diagonalize
 //  対角化実行
 // @break 対角化実行関数
 //
-void Rwr::diagonalize(thrust::host_vector<double> vec,thrust::host_vector<double> ret,int vec_size){
+void Rwr::diagonalize(thrust::host_vector<double> &vec,
+		      thrust::host_vector<double> &ret,
+		      int vec_size){
   vector<double> std_ret(vec_size);
   this->diag->power_method(vec, ret, vec_size);
   for(int j = 0; j < (int)ret.size()/vec_size; j++){

@@ -43,7 +43,10 @@ int main(int argc, char *argv[]){
   string iteration;  // 対角化時の繰り返し回数
   string batch_size; // バッチサイズ
   string output;     // 出力ファイル
-  
+#ifdef _BENCHMARK_
+  Util *utile = new Util();
+#endif /*_BENCHMARK_*/
+
   // 引数parse
   while((opt = getopt(argc, argv,"i:v:o:a:t:b:")) != -1){
     switch(opt){
@@ -75,9 +78,21 @@ int main(int argc, char *argv[]){
     cerr << "[error] usage: rwr -i <trans_mat> -v <init_vec> -a <alpha> -t <iteration> -o <output> -b <batch_size>" << endl;
     exit(-1);
   }
-  Rwr *rwr = new Rwr(trans_mat, init_vec, atoi(iteration.c_str()),
-		     atof(alpha.c_str()), output, atoi(batch_size.c_str()));
+  Rwr *rwr = new Rwr(trans_mat,
+		     init_vec,
+		     atoi(iteration.c_str()),
+		     atof(alpha.c_str()), 
+		     output,
+		     atoi(batch_size.c_str()));
+#ifdef _BENCHMARK_
+  double start_time = utile->cpu_timer();
+#endif /*_BENCHMARK_*/
   rwr->calc();
+#ifdef _BENCHMARK_
+  double elapsed_time = utile->cpu_timer() - start_time;
+  cout <<  "バッチサイズ:" << batch_size << "\t";
+  cout << "処理時間:" << elapsed_time << endl;
+#endif /*_BENCHMARK_*/
   rwr->write();
   exit(0);
 }

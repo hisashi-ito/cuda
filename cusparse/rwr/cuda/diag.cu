@@ -12,7 +12,7 @@
 //
 // 更新履歴:
 //          2018.04.03 新規作成
-//          201
+//          2018.04.17 バッチサイズを指定し推薦元ベクトルをバッチ単位で処理する 
 //
 #include "diag.h"
 
@@ -120,7 +120,7 @@ void Diag::power_method(thrust::host_vector<double> &h_x,
   
   // １つのバッチに含まれるベクトルの本数を調査
   int batch_size = (int)h_x.size()/vec_size;
-    
+  
   // ミニバッチ処理 
   for(int i = 0; i < batch_size; i++){
     thrust::device_vector<double> d_x(vec_size);
@@ -128,8 +128,8 @@ void Diag::power_method(thrust::host_vector<double> &h_x,
     thrust::device_vector<double> d_init_x(vec_size);
     for(int j = 0; j < vec_size; j++){
       d_x[j] = batch_d_x[i * batch_size + j];
-      d_y[j] = 0.0;
-      d_init_x[j] = 0.0;
+      //d_y[j] = 0.0;
+      //d_init_x[j] = 0.0;
     }
     
     // d_x -> d_init_x
@@ -152,7 +152,7 @@ void Diag::power_method(thrust::host_vector<double> &h_x,
     int* _d_csr_cols = thrust::raw_pointer_cast(&(this->d_csr_cols[0]));
     int* _d_csr_rows = thrust::raw_pointer_cast(&(this->d_csr_rows[0]));
     double dummy = 0.0;
-  
+    
     for(int j = 0; j < this->iteration; j++){
       // y = alpha ∗ A ∗ x + (0 * y)
       cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,

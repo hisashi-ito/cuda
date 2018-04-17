@@ -66,7 +66,7 @@ string Util::join(vector<double> &v){
 //        start_time   = cpu_timer()
 //        ・・・なにかの処理・・・
 //        elapsed_time = cpu_timer() - start_time;
-double cpu_timer(){
+double Util::cpu_timer(){
   struct timeval tp;
   // time.hで定義されている関数
   gettimeofday(&tp, NULL);
