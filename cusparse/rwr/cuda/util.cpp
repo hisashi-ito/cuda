@@ -10,6 +10,7 @@
 //
 // 更新履歴: 
 //          2018.04.07 新規作成
+//          2018.04.17 CPUタイマ関数の追加
 //
 #include "util.h"
 
@@ -56,4 +57,19 @@ string Util::join(vector<double> &v){
     }
   }
   return s;
+}
+
+// @cpu_timer
+//  CPUタイマ関数
+// @breaf CPUの計算時間を測定する関数
+//        とあるコード部分の経過時間を測定する場合は
+//        start_time   = cpu_timer()
+//        ・・・なにかの処理・・・
+//        elapsed_time = cpu_timer() - start_time;
+double cpu_timer(){
+  struct timeval tp;
+  // time.hで定義されている関数
+  gettimeofday(&tp, NULL);
+  // tv_sec で秒, tv_usec でマイクロ秒を算出して合計して算出する
+  return ((double)tp.tv_sec + (double)tp.tv_usec * 1.0e-6);
 }

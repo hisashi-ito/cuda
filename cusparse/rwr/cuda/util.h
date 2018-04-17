@@ -10,6 +10,7 @@
 //
 // 更新履歴: 
 //          2018.04.07 新規作成
+//          2018.04.17 CPUタイマ関数の追加
 //
 #ifndef _UTIL_
 #define _UTIL_
@@ -23,6 +24,7 @@
 #include <iomanip>
 #include <sstream>
 #include <cstdlib>
+#include <sys/time.h>
 
 using namespace std;
 
@@ -39,5 +41,8 @@ class Util{
   
   // join 関数
   string join(vector<double> &v);
+
+  // CPU タイマ関数
+  double cpu_timer();
 };
 #endif /*_UTIL_*/
