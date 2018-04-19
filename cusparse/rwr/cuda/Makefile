@@ -1,7 +1,6 @@
 # Make file for rwr (CUDA版)
 CC       = nvcc
-#GFLAGS   = #-arch=sm_62 -gencode=arch=compute_62,code=sm_62
-GFLAGS   = -arch=sm_50 -gencode=arch=compute_50,code=sm_50
+GFLAGS   = -arch=sm_62 -gencode=arch=compute_62,code=sm_62
 LINK     = -lcusparse
 CPP      = -D _BENCHMARK_
 OPTIMIZE = -O3

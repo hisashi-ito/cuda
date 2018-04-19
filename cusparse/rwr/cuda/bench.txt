@@ -1,0 +1,45 @@
+nohup: ignoring input
+time ./rwr -i ../data/big_matrix.tsv -v ../data/big_vec.tsv -o ./output.tsv -a 0.85 -t 30 -b 5
+バッチサイズ:5	処理時間:1379.82
+1208.87user 185.38system 23:18.31elapsed 99%CPU (0avgtext+0avgdata 1443648maxresident)k
+69440inputs+1523272outputs (23major+375085minor)pagefaults 0swaps
+time ./rwr -i ../data/big_matrix.tsv -v ../data/big_vec.tsv -o ./output.tsv -a 0.85 -t 30 -b 10
+バッチサイズ:10	処理時間:977.849
+862.13user 130.96system 16:42.07elapsed 99%CPU (0avgtext+0avgdata 1451092maxresident)k
+144inputs+1078656outputs (0major+418008minor)pagefaults 0swaps
+time ./rwr -i ../data/big_matrix.tsv -v ../data/big_vec.tsv -o ./output.tsv -a 0.85 -t 30 -b 20
+バッチサイズ:20	処理時間:529.203
+472.19user 73.48system 9:10.57elapsed 99%CPU (0avgtext+0avgdata 947400maxresident)k
+152inputs+590176outputs (0major+283853minor)pagefaults 0swaps
+time ./rwr -i ../data/big_matrix.tsv -v ../data/big_vec.tsv -o ./output.tsv -a 0.85 -t 30 -b 30
+バッチサイズ:30	処理時間:498.273
+449.65user 64.65system 8:38.22elapsed 99%CPU (0avgtext+0avgdata 949312maxresident)k
+56inputs+552296outputs (0major+284341minor)pagefaults 0swaps
+time ./rwr -i ../data/big_matrix.tsv -v ../data/big_vec.tsv -o ./output.tsv -a 0.85 -t 30 -b 40
+バッチサイズ:40	処理時間:394.563
+356.33user 54.24system 6:53.84elapsed 99%CPU (0avgtext+0avgdata 694988maxresident)k
+40inputs+434656outputs (0major+220674minor)pagefaults 0swaps
+time ./rwr -i ../data/big_matrix.tsv -v ../data/big_vec.tsv -o ./output.tsv -a 0.85 -t 30 -b 50
+バッチサイズ:50	処理時間:270.864
+250.14user 37.21system 4:49.51elapsed 99%CPU (0avgtext+0avgdata 696176maxresident)k
+24inputs+297096outputs (0major+234652minor)pagefaults 0swaps
+time ./rwr -i ../data/big_matrix.tsv -v ../data/big_vec.tsv -o ./output.tsv -a 0.85 -t 30 -b 60
+バッチサイズ:60	処理時間:288.081
+266.42user 37.77system 5:06.74elapsed 99%CPU (0avgtext+0avgdata 695384maxresident)k
+32inputs+317032outputs (0major+234389minor)pagefaults 0swaps
+time ./rwr -i ../data/big_matrix.tsv -v ../data/big_vec.tsv -o ./output.tsv -a 0.85 -t 30 -b 70
+バッチサイズ:70	処理時間:303.199
+279.05user 40.30system 5:22.09elapsed 99%CPU (0avgtext+0avgdata 695508maxresident)k
+48inputs+336968outputs (0major+234399minor)pagefaults 0swaps
+time ./rwr -i ../data/big_matrix.tsv -v ../data/big_vec.tsv -o ./output.tsv -a 0.85 -t 30 -b 80
+バッチサイズ:80	処理時間:328.657
+302.51user 43.26system 5:47.71elapsed 99%CPU (0avgtext+0avgdata 697260maxresident)k
+8inputs+356904outputs (0major+234936minor)pagefaults 0swaps
+time ./rwr -i ../data/big_matrix.tsv -v ../data/big_vec.tsv -o ./output.tsv -a 0.85 -t 30 -b 90
+バッチサイズ:90	処理時間:342.011
+312.72user 45.49system 6:01.20elapsed 99%CPU (0avgtext+0avgdata 695492maxresident)k
+16inputs+376840outputs (0major+234421minor)pagefaults 0swaps
+time ./rwr -i ../data/big_matrix.tsv -v ../data/big_vec.tsv -o ./output.tsv -a 0.85 -t 30 -b 100
+バッチサイズ:100	処理時間:182.072
+174.22user 24.32system 3:19.44elapsed 99%CPU (0avgtext+0avgdata 571092maxresident)k
+0inputs+199392outputs (0major+203304minor)pagefaults 0swaps
