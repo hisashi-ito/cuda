@@ -1,4 +1,4 @@
-#! /usr/local/bin/ruby19
+#! /usr/bin/ruby
 # -*- coding: utf-8 -*-
 #
 # 【rvec.rb】
