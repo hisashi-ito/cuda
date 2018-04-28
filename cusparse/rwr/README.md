@@ -92,21 +92,39 @@ Jetson TK2
 GPU: NVIDIA Pascal, 256 NVIDIA CUDA Cores  
 CPU: Dual Denver 2/2MB L2 +Quad ARM® A57/2MB L2  
 
-2. 実験環境
+2. 実験(1) (小規模データ)
 ```
-遷移行列サイズ: 93,751 x 93,750  
+遷移行列サイズ: 93,751 x 93,751
 推定データ数: 100  
 べき乗法の繰り返し回数(iteration): 30  
 alpha: 0.85  
 ```
-3. 実験パラメータ  
+2.1. 実験パラメータ  
 [1] CPU(eigen3)で最適化なし  
 [2] CPU(eigen3)でO3最適化  
 [3] GPU(cuda)で最適化なし  
 [4] GPU(cuda)でO3最適化  
 
-4. 結果
+2.2. 結果
 <p align="center">
 <img src="https://user-images.githubusercontent.com/8604827/38763042-bd7c9862-3fce-11e8-8a30-0cd64ae2afa5.jpg" width="600px">
 </p>
 基本的にはGPU実装が速いがeigen3の最適化後もかなり高速。
+
+3. 実験(2) (大規模データ)
+```
+遷移行列サイズ: 93,751 x 93,751
+推定データ数: 40
+べき乗法の繰り返し回数(iteration): 30  
+alpha: 0.85  
+```
+3.1. 実験パラメータ   
+[2] CPU(eigen3)[eigen3]でO3最適化    
+[4] GPU(cuda)[cuSPARSE]でO3最適化  
+
+3.2. 結果
+<p align="center">
+<img src="https://user-images.githubusercontent.com/8604827/39390032-0278c41c-4aca-11e8-9af6-c8bf163f6e3f.png" width="600px">
+</p>
+データを大規模にするとGPUのアドバンテージがでてくる。eigen3に比較して３倍強の速度がでている。
+
