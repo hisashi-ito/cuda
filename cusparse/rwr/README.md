@@ -119,12 +119,11 @@ alpha: 0.85
 alpha: 0.85  
 ```
 3.1. 実験パラメータ   
-[2] CPU(eigen3)[eigen3]でO3最適化    
-[4] GPU(cuda)[cuSPARSE]でO3最適化  
+[1] CPU(eigen3)[eigen3]でO3最適化   
+[2] GPU(cuda)[cuSPARSE]でO3最適化  
 
 3.2. 結果
 <p align="center">
 <img src="https://user-images.githubusercontent.com/8604827/39390032-0278c41c-4aca-11e8-9af6-c8bf163f6e3f.png" width="600px">
 </p>
 データを大規模にするとGPUのアドバンテージがでてくる。eigen3に比較して３倍強の速度がでている。
-
