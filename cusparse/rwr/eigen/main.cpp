@@ -39,6 +39,7 @@ int main(int argc, char *argv[]){
   string alpha;      // alpha パラメータ ・・・ google matrix parameter
   string iteration;  // 対角化時の繰り返し回数
   string output;     // 出力ファイル
+  Util *utile = new Util();
   
   // 引数parse
   while((opt = getopt(argc, argv,"i:v:o:a:t:")) != -1){
@@ -70,7 +71,10 @@ int main(int argc, char *argv[]){
     exit(-1);
   }
   Rwr *rwr = new Rwr(trans_mat, init_vec, atoi(iteration.c_str()), atof(alpha.c_str()), output);
+  double start_time = utile->cpu_timer();
   rwr->calc();
+  double elapsed_time = utile->cpu_timer() - start_time;
+  cout << "処理時間:" << elapsed_time << endl;
   rwr->write();
   exit(0);
 }
