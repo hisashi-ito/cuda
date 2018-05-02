@@ -1,6 +1,9 @@
 # Make file for rwr (CUDA版)
 CC       = nvcc
-GFLAGS   = -arch=sm_62 -gencode=arch=compute_62,code=sm_62
+# 1080Ti
+# GFLAGS = -arch=sm_62 -gencode=arch=compute_62,code=sm_62
+# Tesla M40
+GFLAGS   = -arch=sm_50 -gencode=arch=compute_50,code=sm_50
 LINK     = -lcusparse
 OPTIMIZE = -O3
 WALL     = --compiler-options -Wall

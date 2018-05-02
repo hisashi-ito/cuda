@@ -1,7 +1,7 @@
 #! /bin/sh
 alpha=0.85
-mat="../data/matrix.tsv"
-vec="../data/vec.tsv"
+mat="../data/huge_matrix.txt"
+vec="../data/huge_vec.txt"
 output="./output.tsv"
 iteration=30
 cmd="./rwr"

@@ -12,6 +12,7 @@
 //
 // 更新履歴:
 //          2018.04.03 新規作成
+//          2018.05.02 max_element が 1080Ti環境でエラーになったので修正
 //
 #include "diag.h"
 
@@ -38,8 +39,8 @@ Diag::Diag(const string coo_file, int iteration, double alpha){
 
   // non-zero 要素数
   this->nnz = this->h_vals.size();
-  this->row_size = *max_element(this->h_rows.begin(), this->h_rows.end()) + 1;  // 変換前の行列の行数(rows)
-  this->col_size = *max_element(this->h_cols.begin(), this->h_cols.end()) + 1;  // 変換前の行列の行数(colms)
+  this->row_size = *std::max_element(this->h_rows.begin(), this->h_rows.end()) + 1;  // 変換前の行列の行数(rows)
+  this->col_size = *std::max_element(this->h_cols.begin(), this->h_cols.end()) + 1;  // 変換前の行列の行数(colms)
   
   // デバイス側でCOO形式のデバイスメモリを取得
   // ただし、CSR形式への変換はh_vals, h_cols は変更必要ない。
