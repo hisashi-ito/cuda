@@ -14,7 +14,8 @@
 using namespace std;
 
 // normalize vector
-void normalize(thrust::device_vector<double> &v){
+template <typename T>
+void normalize(thrust::device_vector<T> &v){
   double norm = sqrt(thrust::inner_product(v.begin(), v.end(), v.begin(), 0.0));
   using namespace thrust::placeholders;
   thrust::transform(v.begin(), v.end(), v.begin(), _1 /= norm);
@@ -25,7 +26,7 @@ int main(){
   vec[0] = 1.0;
   vec[1] = 2.0;
   // ベクトルの正規化
-  normalize(vec);
+  normalize<double>(vec);
   // 確認
   for(int i = 0; i < vec.size(); i++){
     cout << "vec[" << i << "] = " << vec[i] << endl;
