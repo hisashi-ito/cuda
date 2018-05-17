@@ -94,7 +94,7 @@ void Spmv::calc(){
   // 初期ベクトルと計算結果ベクタを作成
   VectorXf x = this->make_init_vec();
   VectorXf y(this->row_size);
-
+  
 #ifdef _BENCHMARK_
   double start_time = this->util->cpu_timer();
 #endif /*_BENCHMARK_*/
@@ -108,6 +108,6 @@ void Spmv::calc(){
   double elapsed_time = this->util->cpu_timer() - start_time;
   cout << "繰り返し回数:" << this->iteration << endl;
   cout << "総処理時間[sec]:" << elapsed_time << endl;
-  cout << "平均実行時間[msec]:" << elapsed_time / 1000.0 << endl;
+  cout << "1回あたりの平均時間[msec]:" << (elapsed_time/100.0)*1000.0 << endl;
 #endif /*_BENCHMARK_*/
 }
