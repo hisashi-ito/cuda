@@ -10,7 +10,7 @@
 // 更新履歴:
 //           2018.05.16 新規作成
 //
-#ifdef  _SPMV_
+#ifndef _SPMV_
 #define _SPMV_
 
 #include <iostream>
@@ -21,6 +21,7 @@
 #include <fstream>
 #include <typeinfo>
 #include <iomanip>
+#include <stdlib.h>
 #include <algorithm>
 #include <Eigen/Sparse>
 #include "util.h"
@@ -36,20 +37,23 @@ class Spmv{
   ~Spmv(void);
 
   // 遷移行列の読み込み(text-COO形式)
-  // COO形式の遷移行列はトリプレット(float)のvectorとして読み込む
+  // COO 形式の遷移行列はトリプレット(float)のvectorとして読み込む
   void load_matrix(const string file, vector< Triplet<float> > &tvec);
 
+  // 初期ベクトル作成
+  VectorXf make_init_vec();
+  
   // 実行関数(calc)
-  // spmv計算をiteration回実行する
+  // spmv 計算をiteration 回実行する
   void calc();
 
  private:
-  int iteration;    // 冪情報の繰り返し回数
+  int iteration;    // spmv 計算の計算回数
   int nnz;          // 行列(A)の非ゼロ要素の数
   int row_size = 0; // 行列(A)の行数 (c11のみ)
   int col_size = 0; // 行列(A)の列数 (c11のみ)
   Util *util;       // util オブジェクトのポインタ
-  // CRS形式の遷移行列
+  // CRS 形式の遷移行列
   SparseMatrix<float> A;  
 };
 #endif /*_SPMV_*/

@@ -50,7 +50,7 @@ int main(int argc, char *argv[]){
     cerr << "[error] usage: spmv -i <trans_mat> -t <iteration>" << endl;
     exit(-1);
   }
-  SpMv *spmv = new SpMv(trans_mat, atoi(iteration.c_str()));
+  Spmv *spmv = new Spmv(trans_mat, atoi(iteration.c_str()));
   spmv->calc();
   exit(0);
 }
