@@ -87,5 +87,8 @@ spmv計算を繰り返し実施し、平均をとるため設定する数値、1
 ```
 5. OpenMPのプロセス数の設定方法  
 OpenMPのプロセス数の設定方法は環境変数に以下の変数を設定して実現するものとする。
-```export OMP_NUM_THREADS=${CPU数}
+
 ```
+export OMP_NUM_THREADS=${CPU数}
+```
+
