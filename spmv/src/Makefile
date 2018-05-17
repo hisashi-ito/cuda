@@ -1,7 +1,7 @@
 # Make file for Spmv (Eigen3実装)
 CC       = g++
 CFLAGS   = -std=c++11
-OPTIMIZE = -O3
+OPTIMIZE = -O3 -fopenmp
 INCLUDE  = ../../eigen/lib/eigen3.3.4
 CPP      = -D _BENCHMARK_
 OBJECT   = main.o spmv.o util.o
