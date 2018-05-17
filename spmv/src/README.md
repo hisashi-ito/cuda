@@ -4,7 +4,7 @@ Eigen3を利用して単純なSpMv計算を実行し、１回のspmv計算の計
 本プログラムはCOO 形式の行列を読み込みEigen3のライブラリを利用してCRS形式へ変換しSparse Mmatrix vector 演算(SPMV)計算を実行し、この実行時に1回のspmvにかかる計算時間(ミリsec)を測定するものである。  
 本実装はEigenライブラリを用いて実装しているEigenライブラリは高速でかつ、本体のライブラリがヘッダファイルで提供されているのでコンパイル時に利用ヘッダファイルをリンクするだけでよい。
 また本実装はOpenMPによるマルチスレッド実行に対応している。
-#### Eigen3 について
+##### Eigen3 について
 Eigen  
 http://eigen.tuxfamily.org/index.php?title=Main_Page  
 最新のバージョは3.3.4  
