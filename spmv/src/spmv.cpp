@@ -87,7 +87,7 @@ VectorXf Spmv::make_init_vec(){
 //  メイン計算部分(ベンチマーク部分)
 // @breaf
 //  spmv計算を指定された回数(iteration)実行する
-
+//
 void Spmv::calc(){
   // 初期ベクトルと計算結果ベクタを作成
   VectorXf x = this->make_init_vec();
