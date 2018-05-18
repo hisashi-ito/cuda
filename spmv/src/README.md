@@ -1,4 +1,4 @@
-#### Sparse Matrix Vector ｍｕｌｔｉｐｌｉｃａｔｉｏｎ benchmark
+#### Sparse Matrix Vector multipilication benchmark  
 Eigen3を利用してSpMV計算を実行し、１回の計算にかかる計算時間を測定するベンチマークプログラム。  
 F
 本プログラムはCOO形式の行列を読み込みEigen3ライブラリによりCRS形式へ変換する。その後、SpMV計算を実行し、1回のSpMV計算にかかる計算時間(msec)を測定するものである。 本実装はEigen3ライブラリを用いて実装している。Eigenライブラリは高速に動作し、ライブラリがヘッダファイルで提供されているのでコンパイル時に利用ヘッダファイルをリンクするだけで利用できる。また本実装はOpenMPによるマルチスレッド実行に対応している。  
