@@ -9,6 +9,7 @@
 //
 // 更新履歴:
 //          2018.04.13 新規作成
+//          2018.10.14 行列データのフィールドデリミタをTAB文字列に変更
 //
 #include "spmv.h"
 
@@ -46,7 +47,7 @@ void Spmv::load_matrix(const string file, vector< Triplet<float> > &tvec){
   // フォーマット) row,column,value
   while(getline(ifs, buff)){
     // 各行成分のデリミタはカンマ","
-    vector<string> elems = this->util->split(buff, ',');
+    vector<string> elems = this->util->split(buff, '\t');
     int row    = atoi(elems[0].c_str());
     int col    = atoi(elems[1].c_str());
     float val = (float)atof(elems[2].c_str());
